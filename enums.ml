@@ -70,7 +70,8 @@ let enum_type_info_definition app_id e =
   ^ "any(raw_named_type_reference(\"" ^ app_id ^ "\", \"" ^ e.enum_id
   ^ "\"))); " ^ "} "
 
-(* Generate the function definition for API function that is generated to upgrade the enum. *)
+(* Generate the function definition for API function that is generated to
+   upgrade the enum. *)
 let construct_function_options app_id e =
   let make_function_parameter e =
     [

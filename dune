@@ -1,0 +1,8 @@
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
+
+(ocamllex lexer)
+(ocamlyacc grammar)
+
+(executable (name preprocessor) (libraries str))

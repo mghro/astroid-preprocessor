@@ -17,18 +17,8 @@ opam init --disable-sandboxing
 Note that `--disable-sandboxing` is only needed for WSL. If you're running
 Ubuntu directly, it's safer to omit that.
 
-Now install the necessary libraries.
+And now, build it:
 
 ```shell
-opam install yaml
+dune build preprocessor.exe
 ```
-
-And finally, build it:
-
-```shell
-mkdir build
-cd build
-cmake -G"Unix Makefiles" ..
-```
-
-(Yes, this is using CMake at the moment even though there's no C++ code...)

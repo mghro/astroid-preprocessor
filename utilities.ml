@@ -102,7 +102,7 @@ let template_parameters_declaration parameters =
 (* Generate the C++ code to specify a list of template parameters. *)
 let template_parameter_list parameters =
   if List.length parameters != 0 then
-    "<" ^ String.concat "," (List.map (fun (t, p) -> p) parameters) ^ ">"
+    "<" ^ String.concat "," (List.map (fun (_, p) -> p) parameters) ^ ">"
   else ""
 
 (* Given a list of template parameter assignments and a list of template
@@ -112,7 +112,7 @@ let resolved_template_parameter_list assignments parameters =
   if List.length parameters != 0 then
     "<"
     ^ String.concat ","
-        (List.map (fun (t, p) -> resolve_type_id assignments p) parameters)
+        (List.map (fun (_, p) -> resolve_type_id assignments p) parameters)
     ^ ">"
   else ""
 
