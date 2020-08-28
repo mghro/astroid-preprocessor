@@ -2,19 +2,34 @@
 
 Astroid's C++ preprocessor
 
-## Build Instructions
+## Installing OCaml
 
-At the moment, only Ubuntu Linux is supported. It's known to work on 20.04, but
-it may work on other releases.
+This is written in OCaml. If you don't already have it on your system, you
+should be able to get it with a package manager.
 
-First, assuming you're not already developing with OCaml, run the following:
+### Ubuntu Linux
 
 ```shell
 sudo apt-get install -y ocaml-nox
 ```
 
-And now, build it:
+### Windows (via Chocolatey)
 
 ```shell
-dune build preprocessor.exe
+choco install ocpwin
 ```
+
+## Building
+
+At the moment, in order to avoid complicating the dependencies for the C++
+projects that rely on it, this project uses CMake as its build system.
+
+```shell
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
+Note that since it's not actually invoking any C++ tools, the generator that
+you use really doesn't matter.
