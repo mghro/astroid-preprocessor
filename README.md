@@ -10,12 +10,8 @@ it may work on other releases.
 First, assuming you're not already developing with OCaml, run the following:
 
 ```shell
-sudo apt-get install -y ocaml-nox opam pkg-config
-opam init --disable-sandboxing
+sudo apt-get install -y ocaml-nox
 ```
-
-Note that `--disable-sandboxing` is only needed for WSL. If you're running
-Ubuntu directly, it's safer to omit that.
 
 And now, build it:
 
