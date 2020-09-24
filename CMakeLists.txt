@@ -106,7 +106,8 @@ function(add_ocaml_executable prefix executable)
     endif()
     add_custom_command(
         OUTPUT "${build_dir}/${executable_file}"
-        COMMAND ${OCAML_EXECUTABLE} -o ${executable_file} ${library_files} ${object_files}
+        COMMAND ${OCAML_EXECUTABLE} -o ${executable_file} ${library_files}
+                ${object_files}
         DEPENDS ${object_files}
         WORKING_DIRECTORY ${build_dir}
         COMMENT "linking OCaml executable ${executable}"
@@ -118,7 +119,6 @@ endfunction()
 
 # preprocessor
 set(preprocessor_dir "${CMAKE_CURRENT_SOURCE_DIR}/src")
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/preprocessor")
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/types.ml")
 add_ocaml_lex_source(preprocessor "${preprocessor_dir}/lexer.mll"
     DEPENDENCIES types grammar)
@@ -134,14 +134,12 @@ add_regular_ocaml_source(preprocessor "${preprocessor_dir}/structures.ml"
     DEPENDENCIES types utilities functions)
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/enums.ml"
     DEPENDENCIES types utilities functions)
-
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/dependency.ml"
     DEPENDENCIES types utilities)
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/provider.ml"
     DEPENDENCIES types utilities)
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/mutations.ml"
     DEPENDENCIES types utilities)
-
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/unions.ml"
     DEPENDENCIES types utilities enums functions)
 add_regular_ocaml_source(preprocessor "${preprocessor_dir}/blocks.ml"
@@ -153,3 +151,71 @@ add_ocaml_executable(preprocessor preprocessor
     OBJECTS types utilities lexer grammar functions structures enums unions
             dependency provider mutations records blocks main
     LIBRARIES str)
+
+set(PREPROCESSOR_PATH
+    "${CMAKE_CURRENT_BINARY_DIR}/preprocessor")
+if (WIN32)
+    set(PREPROCESSOR_PATH "${PREPROCESSOR_PATH}.exe")
+endif()
+
+# preprocess_header_files preprocesses a list of header files.
+function(preprocess_header_files
+    generated_cpp_files generated_header_files)
+
+    set(zero_value_args )
+    set(one_value_args ACCOUNT_ID TYPE_APP_ID FUNCTION_APP_ID NAMESPACE INDEX_FILE)
+    set(multi_value_args INPUT_FILES)
+    cmake_parse_arguments(MY "${zero_value_args}" "${one_value_args}"
+        "${multi_value_args}" ${ARGN})
+
+    set(generated_cpps)
+    set(generated_headers)
+    set(preprocessed_ids)
+
+    foreach(preprocessed_file ${MY_INPUT_FILES})
+        file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_SOURCE_DIR}
+            ${preprocessed_file})
+        get_filename_component(subdir ${relative_path} PATH)
+        get_filename_component(file_name ${preprocessed_file} NAME)
+        get_filename_component(file_name_we ${preprocessed_file} NAME_WE)
+        set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/generated/${subdir}")
+        file(MAKE_DIRECTORY ${build_dir})
+        set(generated_cpp_file "${build_dir}/${file_name_we}.cpp")
+        set(generated_header_file "${build_dir}/${file_name_we}.hpp")
+        string(REGEX REPLACE "[:/\\\\\\.]" "_" file_id
+            "${subdir}/${file_name_we}")
+        add_custom_command(
+            OUTPUT ${generated_cpp_file} ${generated_header_file}
+            COMMAND ${PREPROCESSOR_PATH} ${preprocessed_file}
+                    ${generated_header_file} ${MY_ACCOUNT_ID}
+                    ${MY_TYPE_APP_ID} ${MY_FUNCTION_APP_ID} ${file_id}
+                    ${MY_NAMESPACE}
+            DEPENDS preprocessor ${preprocessed_file}
+            WORKING_DIRECTORY ${build_dir}
+            COMMENT "preprocessing ${subdir}/${file_name}"
+            VERBATIM)
+        list(APPEND generated_headers ${generated_header_file})
+        list(APPEND generated_cpps ${generated_cpp_file})
+        list(APPEND preprocessed_ids ${file_id})
+    endforeach()
+
+    # Write the API index file.
+    set(api_index
+        "#include <cradle/api.hpp>\nnamespace ${MY_NAMESPACE} {\n")
+    foreach(id ${preprocessed_ids})
+        set(api_index
+            "${api_index}void add_${id}_api(cradle::api_implementation& api)\;\n")
+    endforeach()
+    string(TOUPPER "${MY_NAMESPACE}" uppercase_namespace)
+    set(api_index
+        "${api_index}#define ${uppercase_namespace}_REGISTER_APIS(api)\\\n")
+    foreach(id ${preprocessed_ids})
+        set(api_index "${api_index}add_${id}_api(api)\;\\\n")
+    endforeach()
+    set(api_index "${api_index}\n}\n")
+    file(WRITE "${MY_INDEX_FILE}" ${api_index})
+
+    set(${generated_cpp_files} ${generated_cpps} PARENT_SCOPE)
+    set(${generated_header_files} ${generated_headers} PARENT_SCOPE)
+
+endfunction()
