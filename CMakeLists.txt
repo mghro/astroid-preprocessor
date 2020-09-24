@@ -152,12 +152,12 @@ add_ocaml_executable(preprocessor preprocessor
             dependency provider mutations records blocks main
     LIBRARIES str)
 
+# Record the path of the preprocessor executable that was built.
 set(PREPROCESSOR_PATH
-    "${CMAKE_CURRENT_BINARY_DIR}/preprocessor")
+    "${CMAKE_CURRENT_BINARY_DIR}/preprocessor/preprocessor")
 if (WIN32)
     set(PREPROCESSOR_PATH "${PREPROCESSOR_PATH}.exe")
 endif()
-
 set(ASTROID_PREPROCESSOR_PATH ${PREPROCESSOR_PATH} CACHE INTERNAL "")
 
 # preprocess_header_files preprocesses a list of header files.
