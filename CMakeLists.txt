@@ -158,12 +158,15 @@ if (WIN32)
     set(PREPROCESSOR_PATH "${PREPROCESSOR_PATH}.exe")
 endif()
 
+set(ASTROID_PREPROCESSOR_PATH ${PREPROCESSOR_PATH} CACHE INTERNAL "")
+
 # preprocess_header_files preprocesses a list of header files.
 function(preprocess_header_files
     generated_cpp_files generated_header_files)
 
     set(zero_value_args )
-    set(one_value_args ACCOUNT_ID TYPE_APP_ID FUNCTION_APP_ID NAMESPACE INDEX_FILE)
+    set(one_value_args ACCOUNT_ID TYPE_APP_ID FUNCTION_APP_ID NAMESPACE
+        INDEX_FILE)
     set(multi_value_args INPUT_FILES)
     cmake_parse_arguments(MY "${zero_value_args}" "${one_value_args}"
         "${multi_value_args}" ${ARGN})
@@ -186,7 +189,7 @@ function(preprocess_header_files
             "${subdir}/${file_name_we}")
         add_custom_command(
             OUTPUT ${generated_cpp_file} ${generated_header_file}
-            COMMAND ${PREPROCESSOR_PATH} ${preprocessed_file}
+            COMMAND ${ASTROID_PREPROCESSOR_PATH} ${preprocessed_file}
                     ${generated_header_file} ${MY_ACCOUNT_ID}
                     ${MY_TYPE_APP_ID} ${MY_FUNCTION_APP_ID} ${file_id}
                     ${MY_NAMESPACE}
