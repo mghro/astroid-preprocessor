@@ -36,12 +36,12 @@ let get_enum_revision e =
   get_revision_option e.enum_options
 
 let enum_value_id e v =
-  if enum_preserves_case e then v.ev_id else String.lowercase_ascii v.ev_id
+  if enum_preserves_case e then v.ev_id else String.lowercase v.ev_id
 
 let enum_declaration e =
   "enum class " ^ e.enum_id ^ " " ^ "{ "
   ^ String.concat ","
-      (List.map (fun v -> String.uppercase_ascii v.ev_id) e.enum_values)
+      (List.map (fun v -> String.uppercase v.ev_id) e.enum_values)
   ^ " " ^ "}; "
 
 let enum_type_info_declaration e =
@@ -156,7 +156,7 @@ let enum_query_definitions e =
       (List.map
          (fun v ->
            "case " ^ e.enum_id ^ "::"
-           ^ String.uppercase_ascii v.ev_id
+           ^ String.uppercase v.ev_id
            ^ ": " ^ "return \"" ^ enum_value_id e v ^ "\"; ")
          e.enum_values)
   ^ "} " ^ "throw invalid_enum_value(get_enum_type_info(value), "
@@ -183,9 +183,9 @@ let enum_conversion_definitions e =
       (List.map
          (fun v ->
            "if (boost::to_lower_copy(s) == \""
-           ^ String.lowercase_ascii v.ev_id
+           ^ String.lowercase v.ev_id
            ^ "\") " ^ "{ " ^ "*x = " ^ e.enum_id ^ "::"
-           ^ String.uppercase_ascii v.ev_id
+           ^ String.uppercase v.ev_id
            ^ "; " ^ "return; " ^ "} ")
          e.enum_values)
   ^ "throw invalid_enum_string(get_enum_type_info(" ^ e.enum_id ^ "()), s); "

@@ -51,7 +51,7 @@ let union_has_registered_enum u =
     u.union_options
 
 let cpp_enum_value_of_union_member u m =
-  u.union_id ^ "_type::" ^ String.uppercase_ascii m.um_id
+  u.union_id ^ "_type::" ^ String.uppercase m.um_id
 
 let union_declaration u =
   "struct " ^ u.union_id ^ " " ^ "{ " (* members *) ^ u.union_id
@@ -95,7 +95,7 @@ let union_auto_upgrade_value_declaration u =
     "void auto_upgrade_value(" ^ u.union_id ^ " *x, cradle::value const& v); "
   else ""
 
-(* Generate the C++ code for API function declaration that will be used to 
+(* Generate the C++ code for API function declaration that will be used to
     upgrade the value if it is needed. *)
 let union_upgrade_value_declaration_api_instance app_id u =
   u.union_id ^ " upgrade_value_" ^ u.union_id ^ "(cradle::value const& v);"

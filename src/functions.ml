@@ -258,7 +258,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   ^ "\"; " ^ "implementation_info.account_id = \"" ^ account_id ^ "\"; "
   ^ "implementation_info.app_id = \"" ^ app_id ^ "\"; "
   ^ "implementation_info.upgrade_version = \""
-  ^ String.lowercase_ascii (String.escaped f.function_upgrade_version)
+  ^ String.lowercase (String.escaped f.function_upgrade_version)
   ^ "\"; "
   ^ "implementation_info.flags = cradle::api_function_flag_set(NO_FLAGS) "
   ^ (if f.function_has_monitoring then "| FUNCTION_HAS_MONITORING " else "")
@@ -271,7 +271,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   ^ "; " ^ "implementation_info.level = "
   ^ string_of_int f.function_level
   ^ "; " ^ "api_info.execution_class = \""
-  ^ String.lowercase_ascii (String.escaped f.function_execution_class)
+  ^ String.lowercase (String.escaped f.function_execution_class)
   ^ "\"; " ^ "api_function_type_info type_info; "
   ^ cpp_code_for_parameter_list_info assignments "type_info.parameters"
       f.function_parameters
