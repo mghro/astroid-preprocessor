@@ -862,8 +862,8 @@ let structure_hash_declaration namespace s =
       ^ String.concat ""
           (List.map
              (fun f ->
-               "h = alia::combine_hashes(h, alia::invoke_hash(x." ^ f.field_id
-               ^ ")); ")
+               "h = cradle::combine_hashes(h, cradle::invoke_hash(x."
+               ^ f.field_id ^ ")); ")
              s.structure_fields)
       ^ "return h; " ^ "} " ^ "}; " )
   ^ "} namespace " ^ namespace ^ " { "
@@ -876,7 +876,7 @@ let structure_hash_definition namespace s =
     ^ String.concat ""
         (List.map
            (fun f ->
-             "h = alia::combine_hashes(h, alia::invoke_hash(x." ^ f.field_id
+             "h = cradle::combine_hashes(h, cradle::invoke_hash(x." ^ f.field_id
              ^ ")); ")
            s.structure_fields)
     ^ "return h; " ^ "} " ^ "} namespace " ^ namespace ^ " { "

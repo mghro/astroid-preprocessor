@@ -420,7 +420,7 @@ let union_hash_definitions namespace u =
          (fun m ->
            "case " ^ namespace ^ "::"
            ^ cpp_enum_value_of_union_member u m
-           ^ ": " ^ "return alia::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
+           ^ ": " ^ "return cradle::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
          u.union_members)
   ^ "} " ^ "assert(0); return 0; " ^ "} " ^ "} namespace " ^ namespace ^ " { "
 
