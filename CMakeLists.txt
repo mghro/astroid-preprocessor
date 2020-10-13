@@ -7,9 +7,9 @@ find_program(OCAML_EXECUTABLE ocamlc)
 find_program(OCAML_YACC_EXECUTABLE ocamlyacc)
 find_program(OCAML_LEX_EXECUTABLE ocamllex)
 
-function(add_ocaml_source prefix object_file ocaml_file dependencies)
+function(add_ocaml_source object_file ocaml_file dependencies)
     cmake_parse_arguments(MY "SEPARATE_INTERFACE" "" "" ${ARGN})
-    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${prefix}")
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
     string(REGEX REPLACE "[.]cmo" "" without_extension ${object_file})
     if (MY_SEPARATE_INTERFACE)
         set(interface_file "")
@@ -29,8 +29,8 @@ function(add_ocaml_source prefix object_file ocaml_file dependencies)
         VERBATIM)
 endfunction()
 
-function(add_regular_ocaml_source prefix ocaml_file)
-    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${prefix}")
+function(add_regular_ocaml_source ocaml_file)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
     cmake_parse_arguments(MY "" "" "DEPENDENCIES" ${ARGN})
     get_filename_component(base_name ${ocaml_file} NAME_WE)
     set(copied_file "${build_dir}/${base_name}.ml")
@@ -42,12 +42,11 @@ function(add_regular_ocaml_source prefix ocaml_file)
         DEPENDS ${ocaml_file}
         COMMENT "copying OCaml file ${copied_file}"
         VERBATIM)
-    add_ocaml_source(${prefix} ${object_file} ${copied_file}
-        "${MY_DEPENDENCIES}")
+    add_ocaml_source(${object_file} ${copied_file} "${MY_DEPENDENCIES}")
 endfunction()
 
-function(add_ocaml_yacc_source prefix yacc_file)
-    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${prefix}")
+function(add_ocaml_yacc_source yacc_file)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
     cmake_parse_arguments(MY "" "" "DEPENDENCIES" ${ARGN})
     get_filename_component(base_name ${yacc_file} NAME_WE)
     set(copied_file "${build_dir}/${base_name}.mly")
@@ -63,14 +62,14 @@ function(add_ocaml_yacc_source prefix yacc_file)
         VERBATIM)
     set(object_file "${build_dir}/${base_name}.cmo")
     set(interface_object_file "${build_dir}/${base_name}.cmi")
-    add_ocaml_source(${prefix} ${object_file} ${ocaml_file}
+    add_ocaml_source(${object_file} ${ocaml_file}
         "${MY_DEPENDENCIES}" SEPARATE_INTERFACE)
-    add_ocaml_source(${prefix} ${interface_object_file} ${interface_file}
+    add_ocaml_source(${interface_object_file} ${interface_file}
         "${MY_DEPENDENCIES}" SEPARATE_INTERFACE)
 endfunction()
 
-function(add_ocaml_lex_source prefix lex_file)
-    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${prefix}")
+function(add_ocaml_lex_source lex_file)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
     cmake_parse_arguments(MY "" "" "DEPENDENCIES" ${ARGN})
     get_filename_component(base_name ${lex_file} NAME_WE)
     set(copied_file "${build_dir}/${base_name}.mll")
@@ -84,12 +83,12 @@ function(add_ocaml_lex_source prefix lex_file)
         WORKING_DIRECTORY ${build_dir}
         COMMENT "compiling OCaml Lex file ${lex_file}"
         VERBATIM)
-    add_ocaml_source(${prefix} ${object_file} ${ocaml_file}
+    add_ocaml_source(${object_file} ${ocaml_file}
         "${MY_DEPENDENCIES}")
 endfunction()
 
-function(add_ocaml_executable prefix executable)
-    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${prefix}")
+function(add_ocaml_executable executable)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
     cmake_parse_arguments(MY "" "" "OBJECTS;LIBRARIES" ${ARGN})
     set(object_files)
     foreach(object ${MY_OBJECTS})
@@ -113,48 +112,48 @@ function(add_ocaml_executable prefix executable)
         COMMENT "linking OCaml executable ${executable}"
         VERBATIM)
     add_custom_target(
-        ${prefix} ALL
+        ${executable} ALL
         DEPENDS "${build_dir}/${executable_file}")
 endfunction()
 
 # preprocessor
 set(preprocessor_dir "${CMAKE_CURRENT_SOURCE_DIR}/src")
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/types.ml")
-add_ocaml_lex_source(preprocessor "${preprocessor_dir}/lexer.mll"
+add_regular_ocaml_source("${preprocessor_dir}/types.ml")
+add_ocaml_lex_source("${preprocessor_dir}/lexer.mll"
     DEPENDENCIES types grammar)
-add_ocaml_yacc_source(preprocessor "${preprocessor_dir}/grammar.mly"
+add_ocaml_yacc_source("${preprocessor_dir}/grammar.mly"
     DEPENDENCIES types)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/utilities.ml"
+add_regular_ocaml_source("${preprocessor_dir}/utilities.ml"
     DEPENDENCIES types)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/functions.ml"
+add_regular_ocaml_source("${preprocessor_dir}/functions.ml"
     DEPENDENCIES types utilities)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/records.ml"
+add_regular_ocaml_source("${preprocessor_dir}/records.ml"
     DEPENDENCIES types utilities)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/structures.ml"
+add_regular_ocaml_source("${preprocessor_dir}/structures.ml"
     DEPENDENCIES types utilities functions)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/enums.ml"
+add_regular_ocaml_source("${preprocessor_dir}/enums.ml"
     DEPENDENCIES types utilities functions)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/dependency.ml"
+add_regular_ocaml_source("${preprocessor_dir}/dependency.ml"
     DEPENDENCIES types utilities)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/provider.ml"
+add_regular_ocaml_source("${preprocessor_dir}/provider.ml"
     DEPENDENCIES types utilities)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/mutations.ml"
+add_regular_ocaml_source("${preprocessor_dir}/mutations.ml"
     DEPENDENCIES types utilities)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/unions.ml"
+add_regular_ocaml_source("${preprocessor_dir}/unions.ml"
     DEPENDENCIES types utilities enums functions)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/blocks.ml"
+add_regular_ocaml_source("${preprocessor_dir}/blocks.ml"
     DEPENDENCIES types utilities grammar lexer functions mutations)
-add_regular_ocaml_source(preprocessor "${preprocessor_dir}/main.ml"
+add_regular_ocaml_source("${preprocessor_dir}/main.ml"
     DEPENDENCIES types utilities functions structures unions enums dependency
                  provider mutations records blocks)
-add_ocaml_executable(preprocessor preprocessor
+add_ocaml_executable(preprocessor
     OBJECTS types utilities lexer grammar functions structures enums unions
             dependency provider mutations records blocks main
     LIBRARIES str)
 
 # Record the path of the preprocessor executable that was built.
 set(PREPROCESSOR_PATH
-    "${CMAKE_CURRENT_BINARY_DIR}/preprocessor/preprocessor")
+    "${CMAKE_CURRENT_BINARY_DIR}/preprocessor")
 if (WIN32)
     set(PREPROCESSOR_PATH "${PREPROCESSOR_PATH}.exe")
 endif()
