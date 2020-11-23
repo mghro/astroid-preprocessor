@@ -63,7 +63,7 @@ function(add_ocaml_yacc_source yacc_file)
     set(object_file "${build_dir}/${base_name}.cmo")
     set(interface_object_file "${build_dir}/${base_name}.cmi")
     add_ocaml_source(${object_file} ${ocaml_file}
-        "${MY_DEPENDENCIES}" SEPARATE_INTERFACE)
+        "${MY_DEPENDENCIES};grammar" SEPARATE_INTERFACE)
     add_ocaml_source(${interface_object_file} ${interface_file}
         "${MY_DEPENDENCIES}" SEPARATE_INTERFACE)
 endfunction()
