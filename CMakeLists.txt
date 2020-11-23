@@ -112,7 +112,7 @@ function(add_ocaml_executable executable)
         COMMENT "linking OCaml executable ${executable}"
         VERBATIM)
     add_custom_target(
-        ${executable} ALL
+        astroid_preprocessor ALL
         DEPENDS "${build_dir}/${executable_file}")
 endfunction()
 
@@ -192,7 +192,7 @@ function(preprocess_header_files
                     ${generated_header_file} ${MY_ACCOUNT_ID}
                     ${MY_TYPE_APP_ID} ${MY_FUNCTION_APP_ID} ${file_id}
                     ${MY_NAMESPACE}
-            DEPENDS preprocessor ${preprocessed_file}
+            DEPENDS astroid_preprocessor ${preprocessed_file}
             WORKING_DIRECTORY ${build_dir}
             COMMENT "preprocessing ${subdir}/${file_name}"
             VERBATIM)
