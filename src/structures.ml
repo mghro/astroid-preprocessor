@@ -174,7 +174,7 @@ let full_structure_type s =
 
 (* Generate the C++ get_type_info function for a single instantiation of a
    structure. *)
-let structure_type_info_definition_instance app_id label assignments s =
+let structure_type_info_definition_instance app_id namespace label assignments s =
   let full_structure_name =
     s.structure_id
     ^ resolved_template_parameter_list assignments s.structure_parameters
@@ -185,8 +185,11 @@ let structure_type_info_definition_instance app_id label assignments s =
   cpp_code_blocks
     [
       [
+        "}";
+      ];
+      [
         "void";
-        "definitive_type_info_query<" ^ full_structure_name ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    std::map<std::string, cradle::api_structure_field_info> fields;";
@@ -200,7 +203,7 @@ let structure_type_info_definition_instance app_id label assignments s =
       ];
       [
         "void";
-        "type_info_query<" ^ full_structure_name ^ ">::get(";
+        "cradle::type_info_query<" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -211,7 +214,7 @@ let structure_type_info_definition_instance app_id label assignments s =
       ];
       [
         "void";
-        "structure_field_type_info_adder<" ^ full_structure_name ^ ">::add(";
+        "cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">::add(";
         "    std::map<std::string, cradle::api_structure_field_info>* fields)";
         "{";
         ( match s.structure_super with
@@ -232,6 +235,9 @@ let structure_type_info_definition_instance app_id label assignments s =
                  ])
              s.structure_fields);
         "}";
+      ];
+      [
+        "namespace " ^ namespace ^ "{";
       ];
     ]
 
@@ -390,17 +396,17 @@ let structure_upgrade_value_definition app_id s =
 
 (* Generate the C++ get_type_info function for all instantiations of a
    structure. *)
-let structure_type_info_definition app_id s =
+let structure_type_info_definition app_id namespace s =
   let instantiations = enumerate_combinations (get_structure_variants s) in
   String.concat ""
     (List.map
        (fun (assignments, label) ->
-         structure_type_info_definition_instance app_id label assignments s)
+         structure_type_info_definition_instance app_id namespace label assignments s)
        instantiations)
 
 (* Generate the C++ type_info_query declarations for a single instantiation of
    a structure. *)
-let structure_type_info_declaration_instance label assignments s =
+let structure_type_info_declaration_instance namespace label assignments s =
   let full_structure_name =
     s.structure_id
     ^ resolved_template_parameter_list assignments s.structure_parameters
@@ -408,8 +414,11 @@ let structure_type_info_declaration_instance label assignments s =
   cpp_code_blocks
     [
       [
+        "}";
+      ];
+      [
         "template<>";
-        "struct definitive_type_info_query<" ^ full_structure_name ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -417,7 +426,7 @@ let structure_type_info_declaration_instance label assignments s =
       ];
       [
         "template<>";
-        "struct type_info_query<" ^ full_structure_name ^ ">";
+        "struct cradle::type_info_query<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -425,11 +434,14 @@ let structure_type_info_declaration_instance label assignments s =
       ];
       [
         "template<>";
-        "struct structure_field_type_info_adder<" ^ full_structure_name ^ ">";
+        "struct cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    add(std::map<std::string, cradle::api_structure_field_info>*);";
         "};";
+      ];
+      [
+        "namespace " ^ namespace ^ "{";
       ];
     ]
 
@@ -469,12 +481,12 @@ let structure_upgrade_value_declaration s =
 
 (* Generate the C++ get_type_info declaration for all instantiations of a
    structure. *)
-let structure_type_info_declaration s =
+let structure_type_info_declaration namespace s =
   let instantiations = enumerate_combinations (get_structure_variants s) in
   String.concat ""
     (List.map
        (fun (assignments, label) ->
-         structure_type_info_declaration_instance label assignments s)
+         structure_type_info_declaration_instance namespace label assignments s)
        instantiations)
 
 (* Generate the request constructor definition for one instance of a
@@ -917,7 +929,7 @@ let hpp_string_of_structure app_id app_namespace env s =
   "} namespace " ^ namespace ^ " { " ^ structure_declaration s
   (* ^ structure_request_declaration s *)
   ^ structure_make_constructor_definition s
-  ^ structure_type_info_declaration s
+  ^ structure_type_info_declaration namespace s
   (* ^ structure_upgrade_type_declaration s
      ^ structure_upgrade_value_declaration s *)
   ^ structure_subtyping_definitions env s
@@ -937,7 +949,7 @@ let cpp_string_of_structure account_id app_id app_namespace env s =
   let namespace = resolve_structure_namespace app_namespace s in
   "} namespace " ^ namespace ^ " { "
   (* ^ structure_request_definition s *)
-  ^ structure_type_info_definition app_id s
+  ^ structure_type_info_definition app_id namespace s
   (* ^ structure_upgrade_type_definition app_id s
      ^ structure_upgrade_value_definition app_id s
      ^ "} namespace " ^ app_namespace ^ " { "

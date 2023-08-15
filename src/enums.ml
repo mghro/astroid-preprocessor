@@ -44,12 +44,15 @@ let enum_declaration e =
       (List.map (fun v -> String.uppercase v.ev_id) e.enum_values)
   ^ " " ^ "}; "
 
-let enum_type_info_declaration e =
+let enum_type_info_declaration namespace e =
   cpp_code_blocks
     [
       [
+        "}";
+      ];
+      [
         "template<>";
-        "struct definitive_type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -57,7 +60,7 @@ let enum_type_info_declaration e =
       ];
       [
         "template<>";
-        "struct type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::type_info_query<" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -65,20 +68,26 @@ let enum_type_info_declaration e =
       ];
       [
         "template<>";
-        "struct enum_type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::enum_type_info_query<" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_enum_info*);";
         "};";
       ];
+      [
+        "namespace " ^ namespace ^ "{";
+      ];
     ]
 
-let enum_type_info_definition app_id e =
+let enum_type_info_definition app_id namespace e =
   cpp_code_blocks
     [
       [
+        "}";
+      ];
+      [
         "void";
-        "definitive_type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ e.enum_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -88,7 +97,7 @@ let enum_type_info_definition app_id e =
       ];
       [
         "void";
-        "type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::type_info_query<" ^ e.enum_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -99,7 +108,7 @@ let enum_type_info_definition app_id e =
       ];
       [
         "void";
-        "enum_type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::enum_type_info_query<" ^ e.enum_id ^ ">::get(";
         "    cradle::api_enum_info* info)";
         "{";
         "    std::map<std::string, cradle::api_enum_value_info> values;";
@@ -115,6 +124,9 @@ let enum_type_info_definition app_id e =
              e.enum_values);
         "    *info = cradle::api_enum_info(values);";
         "}";
+      ];
+      [
+        "namespace " ^ namespace ^ "{";
       ];
     ]
 
@@ -310,7 +322,7 @@ let enum_deep_sizeof_definition e =
 
 let hpp_string_of_enum account_id app_id namespace e =
   enum_declaration e
-  ^ enum_type_info_declaration e
+  ^ enum_type_info_declaration namespace e
   ^ enum_deep_sizeof_definition e
   ^ enum_hash_declaration namespace e
   ^ enum_query_declarations e
@@ -320,7 +332,7 @@ let hpp_string_of_enum account_id app_id namespace e =
    ^ enum_upgrade_declaration e *)
 
 let cpp_string_of_enum account_id app_id namespace e =
-  enum_type_info_definition app_id e
+  enum_type_info_definition app_id namespace e
   ^ enum_hash_definition namespace e
   ^ enum_query_definitions e
   ^ enum_conversion_definitions e
