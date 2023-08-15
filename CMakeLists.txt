@@ -3,9 +3,9 @@ project(preprocessor)
 
 include(CMakeParseArguments)
 
-find_program(OCAML_EXECUTABLE ocamlc)
-find_program(OCAML_YACC_EXECUTABLE ocamlyacc)
-find_program(OCAML_LEX_EXECUTABLE ocamllex)
+find_program(OCAML_EXECUTABLE ocamlc REQUIRED)
+find_program(OCAML_YACC_EXECUTABLE ocamlyacc REQUIRED)
+find_program(OCAML_LEX_EXECUTABLE ocamllex REQUIRED)
 
 function(add_ocaml_source object_file ocaml_file dependencies)
     cmake_parse_arguments(MY "SEPARATE_INTERFACE" "" "" ${ARGN})
