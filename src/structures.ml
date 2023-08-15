@@ -189,11 +189,11 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::definitive_type_info_query<" ^ full_structure_name ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    std::map<std::string, cradle::api_structure_field_info> fields;";
-        "    structure_field_type_info_adder<" ^ full_structure_name
+        "    structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name
         ^ ">::add(&fields);";
         "    *info =";
         "        cradle::make_api_type_info_with_structure_type(";
@@ -203,7 +203,7 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::type_info_query<" ^ full_structure_name ^ ">::get(";
+        "cradle::type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -214,12 +214,12 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">::add(";
+        "cradle::structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name ^ ">::add(";
         "    std::map<std::string, cradle::api_structure_field_info>* fields)";
         "{";
         ( match s.structure_super with
         | Some super ->
-            "    structure_field_type_info_adder<" ^ super ^ ">::add(fields); "
+            "    structure_field_type_info_adder<" ^ namespace ^ "::" ^ super ^ ">::add(fields); "
         | None -> "" );
         String.concat ""
           (List.map
@@ -230,7 +230,7 @@ let structure_type_info_definition_instance app_id namespace label assignments s
                    "    cradle::api_structure_field_info(";
                    "        \"" ^ String.escaped f.field_description ^ "\",";
                    "        cradle::get_type_info<decltype(std::declval<"
-                   ^ full_structure_name ^ ">()." ^ f.field_id ^ ")>(),";
+                   ^ namespace ^ "::" ^ full_structure_name ^ ">()." ^ f.field_id ^ ")>(),";
                    "        none);";
                  ])
              s.structure_fields);

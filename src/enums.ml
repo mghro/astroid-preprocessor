@@ -87,17 +87,17 @@ let enum_type_info_definition app_id namespace e =
       ];
       [
         "void";
-        "cradle::definitive_type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
         "        cradle::make_api_type_info_with_enum_type(";
-        "            cradle::get_enum_type_info<" ^ e.enum_id ^ ">());";
+        "            cradle::get_enum_type_info<" ^ namespace ^ "::" ^ e.enum_id ^ ">());";
         "}";
       ];
       [
         "void";
-        "cradle::type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";

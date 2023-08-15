@@ -86,7 +86,7 @@ let union_type_info_declaration namespace u =
       ];
       [
         "template<>";
-        "struct cradle::definitive_type_info_query<" ^ u.union_id ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -94,7 +94,7 @@ let union_type_info_declaration namespace u =
       ];
       [
         "template<>";
-        "struct cradle::type_info_query<" ^ u.union_id ^ ">";
+        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -131,9 +131,10 @@ let union_type_info_definition app_id namespace u =
       ];
       [
         "void";
-        "cradle::definitive_type_info_query<" ^ u.union_id ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
+        "    using namespace " ^ namespace ^ ";";
         "    std::map<std::string, cradle::api_union_member_info> members;";
         String.concat ""
           (List.map
@@ -156,7 +157,7 @@ let union_type_info_definition app_id namespace u =
       ];
       [
         "void";
-        "cradle::type_info_query<" ^ u.union_id ^ ">::get(";
+        "cradle::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -177,8 +178,7 @@ let union_upgrade_type_info_definition app_id u =
     ^ " const&, std::vector<std::type_index> parsed_types)" ^ "{ "
     ^ "using cradle::get_explicit_upgrade_type; "
     ^ "using cradle::get_upgrade_type; "
-    ^ "cradle::upgrade_type type = get_explicit_upgrade_type(" ^ u.union_id
-    ^ "()); "
+    ^ "cradle::upgrade_type type = get_explicit_upgrade_type(" ^ u.union_id ^ "()); "
     ^ String.concat ""
         (List.map
            (fun m ->
