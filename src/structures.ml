@@ -418,7 +418,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::definitive_type_info_query<" ^ full_structure_name ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -426,7 +426,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::type_info_query<" ^ full_structure_name ^ ">";
+        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -434,7 +434,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">";
+        "struct cradle::structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    add(std::map<std::string, cradle::api_structure_field_info>*);";
