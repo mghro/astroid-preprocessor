@@ -52,7 +52,7 @@ let enum_type_info_declaration namespace e =
       ];
       [
         "template<>";
-        "struct cradle::definitive_type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -60,7 +60,7 @@ let enum_type_info_declaration namespace e =
       ];
       [
         "template<>";
-        "struct cradle::type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -68,7 +68,7 @@ let enum_type_info_declaration namespace e =
       ];
       [
         "template<>";
-        "struct cradle::enum_type_info_query<" ^ e.enum_id ^ ">";
+        "struct cradle::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_enum_info*);";
