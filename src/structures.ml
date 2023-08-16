@@ -641,7 +641,7 @@ let structure_value_conversion_declarations s =
 let structure_iostream_implementation s =
   template_parameters_declaration s.structure_parameters
   ^ "std::ostream& operator<<(std::ostream& s, " ^ full_structure_type s
-  ^ " const& x) " ^ "{ return s << to_dynamic(x); } "
+  ^ " const& x) " ^ "{ return s << cradle::to_dynamic(x); } "
 
 (* Generate the definitions of the stream functions. *)
 let structure_iostream_definitions s =
