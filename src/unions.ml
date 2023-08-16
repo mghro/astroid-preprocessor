@@ -398,7 +398,7 @@ let union_conversion_definitions u =
          (fun m ->
            "case "
            ^ cpp_enum_value_of_union_member u m
-           ^ ": " ^ "to_dynamic(&s[dynamic(\"" ^ m.um_id ^ "\")], as_" ^ m.um_id
+           ^ ": " ^ "to_dynamic(&s[cradle::dynamic(\"" ^ m.um_id ^ "\")], as_" ^ m.um_id
            ^ "(x)); " ^ "break; ")
          u.union_members)
   ^ "} " ^ "*v = std::move(s); " ^ "} " ^ "void from_dynamic(" ^ u.union_id
