@@ -108,7 +108,7 @@ let enum_type_info_definition app_id namespace e =
       ];
       [
         "void";
-        "cradle::enum_type_info_query<" ^ e.enum_id ^ ">::get(";
+        "cradle::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
         "    cradle::api_enum_info* info)";
         "{";
         "    std::map<std::string, cradle::api_enum_value_info> values;";
