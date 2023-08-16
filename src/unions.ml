@@ -530,7 +530,7 @@ let cpp_code_to_register_union app_id u =
           "    \"" ^ u.union_id ^ "\",";
           "    " ^ string_of_int (get_union_revision u) ^ ",";
           "    \"" ^ String.escaped u.union_description ^ "\",";
-          "    get_definitive_type_info<" ^ u.union_id ^ ">());";
+          "    cradle::get_definitive_type_info<" ^ u.union_id ^ ">());";
           (* "    get_upgrade_type(" ^ u.union_id ^ "(), std::vector<std::type_index>())); " *)
         ] (* ^ cpp_code_to_register_upgrade_function_instance u *)
   else ""

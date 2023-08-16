@@ -977,7 +977,7 @@ let cpp_code_to_register_manual_structure app_id cpp_name name revision
       "    \"" ^ name ^ "\",";
       "    " ^ string_of_int revision ^ ",";
       "    \"" ^ String.escaped description ^ "\",";
-      "    get_definitive_type_info<" ^ cpp_name ^ ">());";
+      "    cradle::get_definitive_type_info<" ^ cpp_name ^ ">());";
       (* "    get_upgrade_type(" ^ cpp_name ^ "(), std::vector<std::type_index>())); " *)
     ]
 

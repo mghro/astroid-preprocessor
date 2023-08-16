@@ -356,7 +356,7 @@ let cpp_code_to_register_enum app_id e =
         "    \"" ^ e.enum_id ^ "\",";
         "    " ^ string_of_int (get_enum_revision e) ^ ",";
         "    \"" ^ String.escaped e.enum_description ^ "\",";
-        "    get_definitive_type_info<" ^ e.enum_id ^ ">());";
+        "    cradle::get_definitive_type_info<" ^ e.enum_id ^ ">());";
         (* "    get_upgrade_type(" ^ e.enum_id ^ "(), std::vector<std::type_index>())); " *)
       ]
   else ""
