@@ -176,7 +176,7 @@ let full_structure_type s =
    structure. *)
 let structure_type_info_definition_instance app_id namespace label assignments s =
   let full_structure_name =
-    s.structure_id
+    namespace ^ "::" ^ s.structure_id
     ^ resolved_template_parameter_list assignments s.structure_parameters
   in
 
@@ -189,11 +189,11 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">::get(";
+        "cradle::definitive_type_info_query<" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    std::map<std::string, cradle::api_structure_field_info> fields;";
-        "    structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name
+        "    structure_field_type_info_adder<" ^ full_structure_name
         ^ ">::add(&fields);";
         "    *info =";
         "        cradle::make_api_type_info_with_structure_type(";
@@ -203,7 +203,7 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">::get(";
+        "cradle::type_info_query<" ^ full_structure_name ^ ">::get(";
         "    cradle::api_type_info* info)";
         "{";
         "    *info =";
@@ -214,7 +214,7 @@ let structure_type_info_definition_instance app_id namespace label assignments s
       ];
       [
         "void";
-        "cradle::structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name ^ ">::add(";
+        "cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">::add(";
         "    std::map<std::string, cradle::api_structure_field_info>* fields)";
         "{";
         ( match s.structure_super with
@@ -230,7 +230,7 @@ let structure_type_info_definition_instance app_id namespace label assignments s
                    "    cradle::api_structure_field_info(";
                    "        \"" ^ String.escaped f.field_description ^ "\",";
                    "        cradle::get_type_info<decltype(std::declval<"
-                   ^ namespace ^ "::" ^ full_structure_name ^ ">()." ^ f.field_id ^ ")>(),";
+                   ^ full_structure_name ^ ">()." ^ f.field_id ^ ")>(),";
                    "        none);";
                  ])
              s.structure_fields);
@@ -408,7 +408,7 @@ let structure_type_info_definition app_id namespace s =
    a structure. *)
 let structure_type_info_declaration_instance namespace label assignments s =
   let full_structure_name =
-    s.structure_id
+    namespace ^ "::" ^ s.structure_id
     ^ resolved_template_parameter_list assignments s.structure_parameters
   in
   cpp_code_blocks
@@ -418,7 +418,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -426,7 +426,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
+        "struct cradle::type_info_query<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    get(cradle::api_type_info*);";
@@ -434,7 +434,7 @@ let structure_type_info_declaration_instance namespace label assignments s =
       ];
       [
         "template<>";
-        "struct cradle::structure_field_type_info_adder<" ^ namespace ^ "::" ^ full_structure_name ^ ">";
+        "struct cradle::structure_field_type_info_adder<" ^ full_structure_name ^ ">";
         "{";
         "    static void";
         "    add(std::map<std::string, cradle::api_structure_field_info>*);";
