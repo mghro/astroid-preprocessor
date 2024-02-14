@@ -86,18 +86,18 @@ let union_type_info_declaration namespace u =
       ];
       [
         "template<>";
-        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+        "struct astroid::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
         "{";
         "    static void";
-        "    get(cradle::api_type_info*);";
+        "    get(astroid::api_type_info*);";
         "};";
       ];
       [
         "template<>";
-        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+        "struct astroid::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">";
         "{";
         "    static void";
-        "    get(cradle::api_type_info*);";
+        "    get(astroid::api_type_info*);";
         "};";
       ];
       [
@@ -108,20 +108,20 @@ let union_type_info_declaration namespace u =
 (* Generate the declaration for getting the upgrade type. *)
 let union_upgrade_type_info_declaration u =
   if not (union_is_internal u) then
-    "cradle::upgrade_type get_upgrade_type(" ^ u.union_id
+    "astroid::upgrade_type get_upgrade_type(" ^ u.union_id
     ^ " const&, std::vector<std::type_index> parsed_types); "
   else ""
 
 (* Generate the declaration for function that will upgrade the union. *)
 let union_auto_upgrade_value_declaration u =
   if not (union_is_internal u) then
-    "void auto_upgrade_value(" ^ u.union_id ^ " *x, cradle::dynamic const& v); "
+    "void auto_upgrade_value(" ^ u.union_id ^ " *x, astroid::dynamic const& v); "
   else ""
 
 (* Generate the C++ code for API function declaration that will be used to
     upgrade the value if it is needed. *)
 let union_upgrade_value_declaration_api_instance app_id u =
-  u.union_id ^ " upgrade_value_" ^ u.union_id ^ "(cradle::dynamic const& v);"
+  u.union_id ^ " upgrade_value_" ^ u.union_id ^ "(astroid::dynamic const& v);"
 
 let union_type_info_definition app_id namespace u =
   cpp_code_blocks
@@ -131,38 +131,38 @@ let union_type_info_definition app_id namespace u =
       ];
       [
         "void";
-        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
-        "    cradle::api_type_info* info)";
+        "astroid::definitive_type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
+        "    astroid::api_type_info* info)";
         "{";
         "    using namespace " ^ namespace ^ ";";
-        "    std::map<std::string, cradle::api_union_member_info> members;";
+        "    std::map<std::string, astroid::api_union_member_info> members;";
         String.concat ""
           (List.map
              (fun m ->
                cpp_indented_code_lines "    "
                  [
                    "members[\"" ^ m.um_id ^ "\"] =";
-                   "    cradle::api_union_member_info(";
+                   "    astroid::api_union_member_info(";
                    "        \"" ^ String.escaped m.um_description ^ "\",";
-                   "        cradle::get_type_info<"
+                   "        astroid::get_type_info<"
                    ^ cpp_code_for_type m.um_type
                    ^ ">());";
                  ])
              u.union_members);
         "    *info =";
-        "        cradle::make_api_type_info_with_union_type(";
-        "            cradle::api_union_info(";
+        "        astroid::make_api_type_info_with_union_type(";
+        "            astroid::api_union_info(";
         "                members));";
         "}";
       ];
       [
         "void";
-        "cradle::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
-        "    cradle::api_type_info* info)";
+        "astroid::type_info_query<" ^ namespace ^ "::" ^ u.union_id ^ ">::get(";
+        "    astroid::api_type_info* info)";
         "{";
         "    *info =";
-        "        cradle::make_api_type_info_with_named_type(";
-        "            cradle::api_named_type_reference(";
+        "        astroid::make_api_type_info_with_named_type(";
+        "            astroid::api_named_type_reference(";
         "                \"" ^ app_id ^ "\", \"" ^ u.union_id ^ "\"));";
         "}";
       ];
@@ -174,11 +174,11 @@ let union_type_info_definition app_id namespace u =
 (* Generate the C++ code to determine the upgrade type *)
 let union_upgrade_type_info_definition app_id u =
   if not (union_is_internal u) then
-    "cradle::upgrade_type get_upgrade_type(" ^ u.union_id
+    "astroid::upgrade_type get_upgrade_type(" ^ u.union_id
     ^ " const&, std::vector<std::type_index> parsed_types)" ^ "{ "
-    ^ "using cradle::get_explicit_upgrade_type; "
-    ^ "using cradle::get_upgrade_type; "
-    ^ "cradle::upgrade_type type = get_explicit_upgrade_type(" ^ u.union_id ^ "()); "
+    ^ "using astroid::get_explicit_upgrade_type; "
+    ^ "using astroid::get_upgrade_type; "
+    ^ "astroid::upgrade_type type = get_explicit_upgrade_type(" ^ u.union_id ^ "()); "
     ^ String.concat ""
         (List.map
            (fun m ->
@@ -189,7 +189,7 @@ let union_upgrade_type_info_definition app_id u =
              ^ "parsed_types.push_back(std::type_index(typeid("
              ^ cpp_code_for_type m.um_type
              ^ "()))); "
-             ^ "type = cradle::merged_upgrade_type(type, get_upgrade_type("
+             ^ "type = astroid::merged_upgrade_type(type, get_upgrade_type("
              ^ cpp_code_for_type m.um_type
              ^ "(), parsed_types)); } ")
            u.union_members)
@@ -199,8 +199,8 @@ let union_upgrade_type_info_definition app_id u =
 (* Matches up union member to its upgrade function and sets value to upgraded member value *)
 let union_auto_upgrade_value_definition app_id u =
   if not (union_is_internal u) then
-    "void auto_upgrade_value(" ^ u.union_id ^ " *x, cradle::dynamic const& v)"
-    ^ "{ " ^ "auto const& fields = cradle::cast<cradle::dynamic_map>(v); "
+    "void auto_upgrade_value(" ^ u.union_id ^ " *x, astroid::dynamic const& v)"
+    ^ "{ " ^ "auto const& fields = astroid::cast<astroid::dynamic_map>(v); "
     ^ String.concat ""
         (List.map
            (fun m ->
@@ -216,7 +216,7 @@ let union_auto_upgrade_value_definition app_id u =
 
 (* Generate the C++ code for API function that will be used to upgrade the value. *)
 let union_upgrade_value_definition_api_instance app_id u =
-  u.union_id ^ " upgrade_value_" ^ u.union_id ^ "(cradle::dynamic const& v)"
+  u.union_id ^ " upgrade_value_" ^ u.union_id ^ "(astroid::dynamic const& v)"
   ^ "{" ^ u.union_id ^ " x;" ^ "upgrade_value(&x, v); " ^ "return x; " ^ "}"
 
 (* Generate the function definition for API function that is generated to upgrade the union. *)
@@ -225,7 +225,7 @@ let construct_union_upgrade_function_options app_id u =
     [
       {
         parameter_id = "v";
-        parameter_type = [ Tid "cradle"; Tseparator; Tid "value" ];
+        parameter_type = [ Tid "astroid"; Tseparator; Tid "value" ];
         parameter_description = "value to upgrade";
         parameter_by_reference = true;
       };
@@ -374,7 +374,7 @@ let union_deep_sizeof_declaration u =
 
 let union_deep_sizeof_definition u =
   "size_t deep_sizeof(" ^ u.union_id ^ " const& x) " ^ "{ "
-  ^ "using cradle::deep_sizeof; " ^ "size_t size = sizeof(x); "
+  ^ "using astroid::deep_sizeof; " ^ "size_t size = sizeof(x); "
   ^ "switch (x.type) " ^ "{ "
   ^ String.concat ""
       (List.map
@@ -386,24 +386,24 @@ let union_deep_sizeof_definition u =
   ^ "} " ^ "return size; " ^ "} "
 
 let union_conversion_declarations u =
-  "void to_dynamic(cradle::dynamic* v, " ^ u.union_id ^ " const& x); "
-  ^ "void from_dynamic(" ^ u.union_id ^ "* x, cradle::dynamic const& v); "
+  "void to_dynamic(astroid::dynamic* v, " ^ u.union_id ^ " const& x); "
+  ^ "void from_dynamic(" ^ u.union_id ^ "* x, astroid::dynamic const& v); "
   ^ "std::ostream& operator<<(std::ostream& s, " ^ u.union_id ^ " const& x); "
 
 let union_conversion_definitions u =
-  "void to_dynamic(cradle::dynamic* v, " ^ u.union_id ^ " const& x) " ^ "{ "
-  ^ "cradle::dynamic_map s; " ^ "switch (x.type) " ^ "{ "
+  "void to_dynamic(astroid::dynamic* v, " ^ u.union_id ^ " const& x) " ^ "{ "
+  ^ "astroid::dynamic_map s; " ^ "switch (x.type) " ^ "{ "
   ^ String.concat ""
       (List.map
          (fun m ->
            "case "
            ^ cpp_enum_value_of_union_member u m
-           ^ ": " ^ "to_dynamic(&s[cradle::dynamic(\"" ^ m.um_id ^ "\")], as_" ^ m.um_id
+           ^ ": " ^ "to_dynamic(&s[astroid::dynamic(\"" ^ m.um_id ^ "\")], as_" ^ m.um_id
            ^ "(x)); " ^ "break; ")
          u.union_members)
   ^ "} " ^ "*v = std::move(s); " ^ "} " ^ "void from_dynamic(" ^ u.union_id
-  ^ "* x, cradle::dynamic const& v) " ^ "{ " ^ "cradle::dynamic_map const& s = "
-  ^ "cradle::cast<cradle::dynamic_map>(v); "
+  ^ "* x, astroid::dynamic const& v) " ^ "{ " ^ "astroid::dynamic_map const& s = "
+  ^ "astroid::cast<astroid::dynamic_map>(v); "
   ^ "from_dynamic(&x->type, get_union_tag(s)); " ^ "switch (x->type) " ^ "{ "
   ^ String.concat ""
       (List.map
@@ -416,7 +416,7 @@ let union_conversion_definitions u =
            ^ "\")); " ^ "x->contents_ = tmp; " ^ "break; " ^ " } ")
          u.union_members)
   ^ "} " ^ "} " ^ "std::ostream& operator<<(std::ostream& s, " ^ u.union_id
-  ^ " const& x) " ^ "{ return s << cradle::to_dynamic(x); } "
+  ^ " const& x) " ^ "{ return s << astroid::to_dynamic(x); } "
 
 let union_swap_declaration u =
   "void swap(" ^ u.union_id ^ "& a, " ^ u.union_id ^ "& b); "
@@ -472,7 +472,7 @@ let union_hash_definitions namespace u =
            (fun m ->
              "case "
              ^ cpp_enum_value_of_union_member u m
-             ^ ": " ^ "return cradle::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
+             ^ ": " ^ "return astroid::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
            u.union_members);
       "    }";
       "assert(0);";
@@ -483,7 +483,7 @@ let union_hash_definitions namespace u =
 (* Generate C++ code to register API function for upgrading values *)
 let cpp_code_to_register_upgrade_function_instance u =
   let full_public_name = "upgrade_value_" ^ u.union_id in
-  "\nregister_api_function(api, " ^ "cradle::api_function_ptr(new "
+  "\nregister_api_function(api, " ^ "astroid::api_function_ptr(new "
   ^ full_public_name ^ "_fn_def)); "
 
 let hpp_string_of_union account_id app_id namespace u =
@@ -530,7 +530,7 @@ let cpp_code_to_register_union app_id u =
           "    \"" ^ u.union_id ^ "\",";
           "    " ^ string_of_int (get_union_revision u) ^ ",";
           "    \"" ^ String.escaped u.union_description ^ "\",";
-          "    cradle::get_definitive_type_info<" ^ u.union_id ^ ">());";
+          "    astroid::get_definitive_type_info<" ^ u.union_id ^ ">());";
           (* "    get_upgrade_type(" ^ u.union_id ^ "(), std::vector<std::type_index>())); " *)
         ] (* ^ cpp_code_to_register_upgrade_function_instance u *)
   else ""

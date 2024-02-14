@@ -26,7 +26,7 @@ let read_file_as_lines file_path =
 
    (The reason it requires two is that requiring only one would group entire
    namespaces together as single blocks, which is not what we want. Currently,
-   all API blocks are nested within one level of namespace (cradle), so
+   all API blocks are nested within one level of namespace (astroid), so
    requiring two braces works. However, in the future, it'd be nice to make
    this more robust.)
 *)
