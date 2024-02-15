@@ -155,9 +155,7 @@ let main () =
     ^ "#define THINKNODE_FUNCTION_APP \"" ^ fun_app_id ^ "\"\n" ^ "#endif"
     ^ "\n" ^ "#ifndef THINKNODE_TYPES_APP" ^ "\n"
     ^ "#define THINKNODE_TYPES_APP \"" ^ type_app_id ^ "\"\n" ^ "#endif" ^ "\n"
-    (* Let the core CRADLE headers figure out their own dependencies. *)
-    ^ ( if contains_substring output_file "cradle/typing/core" then ""
-      else "#include <cradle/typing/core/preprocessed.h>\n" )
+    ^ "#include <cradle/typing/core/preprocessed.h>\n"
     (* Emit the clean up code. *)
     ^ String.concat "\n\n" (List.map cpp_cleanup_code_for_block decl_blocks)
     ^ String.concat "\n\n"
