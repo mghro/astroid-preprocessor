@@ -203,10 +203,10 @@ function(preprocess_header_files
 
     # Write the API index file.
     set(api_index
-        "#include <astroid/api.hpp>\nnamespace ${MY_NAMESPACE} {\n")
+        "#include <cradle/api.hpp>\nnamespace ${MY_NAMESPACE} {\n")
     foreach(id ${preprocessed_ids})
         set(api_index
-            "${api_index}void add_${id}_api(astroid::api_implementation& api)\;\n")
+            "${api_index}void add_${id}_api(cradle::api_implementation& api)\;\n")
     endforeach()
     string(TOUPPER "${MY_NAMESPACE}" uppercase_namespace)
     set(api_index

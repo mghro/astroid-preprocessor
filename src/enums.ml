@@ -52,26 +52,26 @@ let enum_type_info_declaration namespace e =
       ];
       [
         "template<>";
-        "struct astroid::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
+        "struct cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
-        "    get(astroid::api_type_info*);";
+        "    get(cradle::api_type_info*);";
         "};";
       ];
       [
         "template<>";
-        "struct astroid::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
+        "struct cradle::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
-        "    get(astroid::api_type_info*);";
+        "    get(cradle::api_type_info*);";
         "};";
       ];
       [
         "template<>";
-        "struct astroid::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
+        "struct cradle::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
         "{";
         "    static void";
-        "    get(astroid::api_enum_info*);";
+        "    get(cradle::api_enum_info*);";
         "};";
       ];
       [
@@ -87,42 +87,42 @@ let enum_type_info_definition app_id namespace e =
       ];
       [
         "void";
-        "astroid::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
-        "    astroid::api_type_info* info)";
+        "cradle::definitive_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
+        "    cradle::api_type_info* info)";
         "{";
         "    *info =";
-        "        astroid::make_api_type_info_with_enum_type(";
-        "            astroid::get_enum_type_info<" ^ namespace ^ "::" ^ e.enum_id ^ ">());";
+        "        cradle::make_api_type_info_with_enum_type(";
+        "            cradle::get_enum_type_info<" ^ namespace ^ "::" ^ e.enum_id ^ ">());";
         "}";
       ];
       [
         "void";
-        "astroid::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
-        "    astroid::api_type_info* info)";
+        "cradle::type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
+        "    cradle::api_type_info* info)";
         "{";
         "    *info =";
-        "        astroid::make_api_type_info_with_named_type(";
-        "            astroid::api_named_type_reference(";
+        "        cradle::make_api_type_info_with_named_type(";
+        "            cradle::api_named_type_reference(";
         "                \"" ^ app_id ^ "\", \"" ^ e.enum_id ^ "\"));";
         "}";
       ];
       [
         "void";
-        "astroid::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
-        "    astroid::api_enum_info* info)";
+        "cradle::enum_type_info_query<" ^ namespace ^ "::" ^ e.enum_id ^ ">::get(";
+        "    cradle::api_enum_info* info)";
         "{";
-        "    std::map<std::string, astroid::api_enum_value_info> values;";
+        "    std::map<std::string, cradle::api_enum_value_info> values;";
         String.concat ""
           (List.map
              (fun v ->
                cpp_code_lines
                  [
                    "values[\"" ^ enum_value_id e v ^ "\"] = ";
-                   "astroid::api_enum_value_info(";
+                   "cradle::api_enum_value_info(";
                    "\"" ^ String.escaped v.ev_description ^ "\");";
                  ])
              e.enum_values);
-        "    *info = astroid::api_enum_info(values);";
+        "    *info = cradle::api_enum_info(values);";
         "}";
       ];
       [
@@ -136,7 +136,7 @@ let construct_function_options app_id e =
     [
       {
         parameter_id = "v";
-        parameter_type = [ Tid "astroid"; Tseparator; Tid "value" ];
+        parameter_type = [ Tid "cradle"; Tseparator; Tid "value" ];
         parameter_description = "value to upgrade";
         parameter_by_reference = true;
       };
@@ -175,30 +175,30 @@ let enum_upgrade_register_function_instance account_id app_id e =
 (* Generate the declaration for getting the upgrade type for the enum. *)
 let enum_upgrade_type_declarations e =
   if not (enum_is_internal e) then
-    "astroid::upgrade_type get_upgrade_type(" ^ e.enum_id
+    "cradle::upgrade_type get_upgrade_type(" ^ e.enum_id
     ^ " const&, std::vector<std::type_index> parsed_types); "
   else ""
 
 (* Generate the declaration for upgrading the enum. *)
 let enum_upgrade_declaration e =
   if not (enum_is_internal e) then
-    e.enum_id ^ " upgrade_value_" ^ e.enum_id ^ "(astroid::dynamic const& v);"
+    e.enum_id ^ " upgrade_value_" ^ e.enum_id ^ "(cradle::dynamic const& v);"
   else ""
 
 (* Generate the definition for getting the upgrade type for the enum. *)
 let enum_upgrade_type_definition e =
   if not (enum_is_internal e) then
-    "astroid::upgrade_type get_upgrade_type(" ^ e.enum_id
+    "cradle::upgrade_type get_upgrade_type(" ^ e.enum_id
     ^ " const&, std::vector<std::type_index> parsed_types)" ^ "{ "
-    ^ "using astroid::get_explicit_upgrade_type;"
-    ^ "astroid::upgrade_type type = get_explicit_upgrade_type(" ^ e.enum_id
+    ^ "using cradle::get_explicit_upgrade_type;"
+    ^ "cradle::upgrade_type type = get_explicit_upgrade_type(" ^ e.enum_id
     ^ "()); " ^ "return type;" ^ "} "
   else ""
 
 (* Generate the definition for upgrading the enum. *)
 let enum_upgrade_definition e =
   if not (enum_is_internal e) then
-    e.enum_id ^ " upgrade_value_" ^ e.enum_id ^ "(astroid::dynamic const& v)"
+    e.enum_id ^ " upgrade_value_" ^ e.enum_id ^ "(cradle::dynamic const& v)"
     ^ "{" ^ e.enum_id ^ " x;" ^ "upgrade_value(&x, v); " ^ "return x; " ^ "}"
   else ""
 
@@ -226,9 +226,9 @@ let enum_query_definitions e =
            e.enum_values);
       "    }";
       "    CRADLE_THROW(";
-      "        astroid::invalid_enum_value() <<";
-      "            astroid::enum_id_info(\"" ^ e.enum_id ^ "\") <<";
-      "            astroid::enum_value_info(int(value)));";
+      "        cradle::invalid_enum_value() <<";
+      "            cradle::enum_id_info(\"" ^ e.enum_id ^ "\") <<";
+      "            cradle::enum_value_info(int(value)));";
       "}";
     ]
 
@@ -250,14 +250,14 @@ let enum_conversion_declarations e =
       [
         "void";
         "to_dynamic(";
-        "    astroid::dynamic* v,";
+        "    cradle::dynamic* v,";
         "    " ^ e.enum_id ^ " x);";
       ];
       [
         "void";
         "from_dynamic(";
         "    " ^ e.enum_id ^ "* x,";
-        "    astroid::dynamic const& v);";
+        "    cradle::dynamic const& v);";
       ];
       [
         "std::ostream&";
@@ -273,7 +273,7 @@ let enum_conversion_definitions e =
       [
         "void";
         "to_dynamic(";
-        "    astroid::dynamic* v,";
+        "    cradle::dynamic* v,";
         "    " ^ e.enum_id ^ " x)";
         "{";
         "    *v = get_value_id(x);";
@@ -283,7 +283,7 @@ let enum_conversion_definitions e =
         "void";
         "from_dynamic(";
         "    " ^ e.enum_id ^ "* x,";
-        "    astroid::dynamic const& v)";
+        "    cradle::dynamic const& v)";
         "{";
         "    std::string s = cast<std::string>(v);";
         String.concat ""
@@ -301,9 +301,9 @@ let enum_conversion_definitions e =
                  ])
              e.enum_values);
         "    CRADLE_THROW(";
-        "        astroid::invalid_enum_string() <<";
-        "            astroid::enum_id_info(\"" ^ e.enum_id ^ "\") <<";
-        "            astroid::enum_string_info(s));";
+        "        cradle::invalid_enum_string() <<";
+        "            cradle::enum_id_info(\"" ^ e.enum_id ^ "\") <<";
+        "            cradle::enum_string_info(s));";
         "}";
       ];
       [
@@ -344,7 +344,7 @@ let cpp_string_of_enum account_id app_id namespace e =
 (* Generate C++ code to register API function for upgrading values *)
 let cpp_code_to_register_upgrade_function_instance e =
   let full_public_name = "upgrade_value_" ^ e.enum_id in
-  "\nregister_api_function(api, " ^ "astroid::api_function_ptr(new "
+  "\nregister_api_function(api, " ^ "cradle::api_function_ptr(new "
   ^ full_public_name ^ "_fn_def)); "
 
 let cpp_code_to_register_enum app_id e =
@@ -356,7 +356,7 @@ let cpp_code_to_register_enum app_id e =
         "    \"" ^ e.enum_id ^ "\",";
         "    " ^ string_of_int (get_enum_revision e) ^ ",";
         "    \"" ^ String.escaped e.enum_description ^ "\",";
-        "    astroid::get_definitive_type_info<" ^ e.enum_id ^ ">());";
+        "    cradle::get_definitive_type_info<" ^ e.enum_id ^ ">());";
         (* "    get_upgrade_type(" ^ e.enum_id ^ "(), std::vector<std::type_index>())); " *)
       ]
   else ""

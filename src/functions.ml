@@ -3,7 +3,7 @@
 open Types
 open Utilities
 
-(* C++ functions can return void, but void is not considered a regular Astroid
+(* C++ functions can return void, but void is not considered a regular CRADLE
    type, so functions that return void are altered so that they return nil
    instead. *)
 let sanitize_return_type t = if is_void t then [ Tid "nil_type" ] else t
@@ -184,10 +184,10 @@ let resolve_function_options f =
    The generated code will push the info onto the C++ vector whose ID is
    passed in 'info_vector'. *)
 let cpp_code_for_parameter_info assignments info_vector p =
-  "{ " ^ "astroid::api_function_parameter_info p; " ^ "p.name = \""
+  "{ " ^ "cradle::api_function_parameter_info p; " ^ "p.name = \""
   ^ p.parameter_id ^ "\"; " ^ "p.description = \""
   ^ String.escaped p.parameter_description
-  ^ "\"; " ^ "using astroid::get_type_info; "
+  ^ "\"; " ^ "using cradle::get_type_info; "
   ^ "p.schema = make_api_type_info(get_type_info("
   ^ cpp_code_for_parameterized_type assignments p.parameter_type
   ^ "())); " ^ info_vector ^ ".push_back(p); " ^ "} "
@@ -212,7 +212,7 @@ let cpp_code_to_get_parameter_from_dynamic_list assignments p =
       "}";
       "catch (boost::exception& e)";
       "{";
-      "    astroid::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
+      "    cradle::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
       "    throw;";
       "}";
       "++arg_i;";
@@ -233,7 +233,7 @@ let cpp_code_to_get_parameter_from_dynamic_map assignments p =
       "}";
       "catch (boost::exception& e)";
       "{";
-      "    astroid::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
+      "    cradle::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
       "    throw;";
       "}";
     ]
@@ -250,13 +250,13 @@ let cpp_code_to_get_parameter_from_immutable_list assignments p =
       parameter_type ^ " const* " ^ p.parameter_id ^ ";";
       "try";
       "{";
-      "    astroid::cast_immutable_value(";
+      "    cradle::cast_immutable_value(";
       "        &" ^ p.parameter_id ^ ",";
       "        get_value_pointer(*arg_i));";
       "}";
       "catch (boost::exception& e)";
       "{";
-      "    astroid::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
+      "    cradle::add_dynamic_path_element(e, \"" ^ p.parameter_id ^ "\");";
       "    throw;";
       "}";
       "++arg_i;";
@@ -284,7 +284,7 @@ let cpp_code_to_call_function f id args_as_pointers =
 let cpp_code_to_define_function_instance account_id app_id f label assignments =
   let full_public_name = f.function_public_name ^ label in
 
-  "struct " ^ full_public_name ^ "_fn_def : astroid::api_function_interface "
+  "struct " ^ full_public_name ^ "_fn_def : cradle::api_function_interface "
   ^ "{ " ^ full_public_name ^ "_fn_def() " ^ "{ " ^ "api_info.name = \""
   ^ full_public_name ^ "\"; " ^ "api_info.description = \""
   ^ String.escaped f.function_description
@@ -293,7 +293,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   ^ "implementation_info.upgrade_version = \""
   ^ String.lowercase (String.escaped f.function_upgrade_version)
   ^ "\"; "
-  ^ "implementation_info.flags = astroid::api_function_flag_set(NO_FLAGS) "
+  ^ "implementation_info.flags = cradle::api_function_flag_set(NO_FLAGS) "
   ^ (if f.function_has_monitoring then "| FUNCTION_HAS_MONITORING " else "")
   ^ (if f.function_is_trivial then "| FUNCTION_IS_TRIVIAL " else "")
   ^ ( if f.function_upgrade_version <> "0.0.0" then "| FUNCTION_IS_UPGRADE "
@@ -308,7 +308,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   ^ "\"; " ^ "api_function_type_info type_info; "
   ^ cpp_code_for_parameter_list_info assignments "type_info.parameters"
       f.function_parameters
-  ^ "using astroid::get_type_info; "
+  ^ "using cradle::get_type_info; "
   ^ "type_info.returns.schema = make_api_type_info(get_type_info("
   ^ cpp_code_for_parameterized_type assignments
       (sanitize_return_type f.function_return_type)
@@ -326,7 +326,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
     cpp_code_to_call_function f f.function_id args_as_pointers
   in
   let code_to_evaluate_function_dynamically =
-    "astroid::dynamic fn_result; "
+    "cradle::dynamic fn_result; "
     ^
     if is_void f.function_return_type then
       code_to_call_function false ^ "; set(fn_result, nil); "
@@ -335,13 +335,13 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
 
   (* Emit code to call the function with a list of dynamic values as
      arguments. *)
-  "astroid::dynamic execute( " ^ "astroid::check_in_interface& check_in, "
-  ^ "astroid::progress_reporter_interface& reporter, "
-  ^ "astroid::dynamic_list const& args) const " ^ "{ " ^ "if (args.size() != "
+  "cradle::dynamic execute( " ^ "cradle::check_in_interface& check_in, "
+  ^ "cradle::progress_reporter_interface& reporter, "
+  ^ "cradle::dynamic_list const& args) const " ^ "{ " ^ "if (args.size() != "
   ^ string_of_int (List.length f.function_parameters)
-  ^ ") " ^ "throw astroid::exception(\"wrong number of arguments (expected "
+  ^ ") " ^ "throw cradle::exception(\"wrong number of arguments (expected "
   ^ string_of_int (List.length f.function_parameters)
-  ^ ")\"); " ^ "astroid::dynamic_list::const_iterator arg_i = args.begin(); "
+  ^ ")\"); " ^ "cradle::dynamic_list::const_iterator arg_i = args.begin(); "
   ^ String.concat ""
       (List.map
          (cpp_code_to_get_parameter_from_dynamic_list assignments)
@@ -349,10 +349,10 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   ^ code_to_evaluate_function_dynamically ^ "return fn_result; " ^ "} "
   (* Emit code to call the function with the arguments passed as a map of
      strings to dynamic values. *)
-  ^ "astroid::dynamic execute("
-  ^ "astroid::check_in_interface& check_in, "
-  ^ "astroid::progress_reporter_interface& reporter, "
-  ^ "astroid::dynamic_map const& args) const " ^ "{ "
+  ^ "cradle::dynamic execute("
+  ^ "cradle::check_in_interface& check_in, "
+  ^ "cradle::progress_reporter_interface& reporter, "
+  ^ "cradle::dynamic_map const& args) const " ^ "{ "
   ^ String.concat ""
       (List.map
          (cpp_code_to_get_parameter_from_dynamic_map assignments)
@@ -361,14 +361,14 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
   (* Emit code to call the function with a list of untyped_immutables as
      arguments. *)
   ^ "untyped_immutable "
-  ^ "execute( " ^ "astroid::check_in_interface& check_in, "
-  ^ "astroid::progress_reporter_interface& reporter, "
-  ^ "std::vector<astroid::untyped_immutable> const& args) " ^ "const " ^ "{ "
+  ^ "execute( " ^ "cradle::check_in_interface& check_in, "
+  ^ "cradle::progress_reporter_interface& reporter, "
+  ^ "std::vector<cradle::untyped_immutable> const& args) " ^ "const " ^ "{ "
   ^ "if (args.size() != "
   ^ string_of_int (List.length f.function_parameters)
-  ^ ") " ^ "throw astroid::exception(\"wrong number of arguments (expected "
+  ^ ") " ^ "throw cradle::exception(\"wrong number of arguments (expected "
   ^ string_of_int (List.length f.function_parameters)
-  ^ ")\"); " ^ "std::vector<astroid::untyped_immutable>::const_iterator "
+  ^ ")\"); " ^ "std::vector<cradle::untyped_immutable>::const_iterator "
   ^ "arg_i = args.begin(); "
   ^ String.concat ""
       (List.map
@@ -415,25 +415,25 @@ let hpp_function_declaration f id =
 (* Generate the definition of the request interface to function instance. *)
 let define_request_interface_for_function_instance account_id app_id f
     assignments cpp_id public_id full_public_id =
-  "astroid::request<"
+  "cradle::request<"
   ^ cpp_code_for_parameterized_type assignments
       (sanitize_return_type f.function_return_type)
   ^ " > " ^ "rq_" ^ public_id ^ "("
   ^ String.concat ", "
       (List.map
          (fun p ->
-           "astroid::request<"
+           "cradle::request<"
            ^ cpp_code_for_parameterized_type assignments p.parameter_type
            ^ " > const& " ^ p.parameter_id ^ "_request")
          f.function_parameters)
-  ^ ") " ^ "{ " ^ "astroid::function_request_info calc_spec_; " ^ "static "
+  ^ ") " ^ "{ " ^ "cradle::function_request_info calc_spec_; " ^ "static "
   ^ full_public_id ^ "_fn_def this_fn; " ^ "calc_spec_.function = &this_fn; "
   ^ String.concat ""
       (List.map
          (fun p ->
            "calc_spec_.args.push_back(" ^ p.parameter_id ^ "_request.untyped); ")
          f.function_parameters)
-  ^ "auto function_request_ = astroid::make_typed_request<"
+  ^ "auto function_request_ = cradle::make_typed_request<"
   ^ cpp_code_for_parameterized_type assignments
       (sanitize_return_type f.function_return_type)
   ^ " >(request_type::FUNCTION, calc_spec_); "
@@ -512,7 +512,7 @@ let cpp_code_to_define_function account_id app_id namespace f =
 let cpp_code_to_register_function_instance f label assignments =
   let full_public_name = f.function_public_name ^ label in
   if not f.function_is_internal then
-    "\nregister_api_function(api, " ^ "astroid::api_function_ptr(new "
+    "\nregister_api_function(api, " ^ "cradle::api_function_ptr(new "
     ^ full_public_name ^ "_fn_def)); "
   else ""
 
@@ -529,14 +529,14 @@ let cpp_code_to_register_function account_id app_id f =
    for this function instance. *)
 let declare_request_interface_for_function_instance account_id app_id f
     assignments cpp_id public_id full_public_id =
-  "astroid::request<"
+  "cradle::request<"
   ^ cpp_code_for_parameterized_type assignments
       (sanitize_return_type f.function_return_type)
   ^ " > " ^ "rq_" ^ public_id ^ "("
   ^ String.concat ", "
       (List.map
          (fun p ->
-           "astroid::request<"
+           "cradle::request<"
            ^ cpp_code_for_parameterized_type assignments p.parameter_type
            ^ " > const& " ^ p.parameter_id ^ "_request")
          f.function_parameters)
