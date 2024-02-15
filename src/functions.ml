@@ -337,11 +337,11 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
      arguments. *)
   "cradle::dynamic execute( " ^ "cradle::check_in_interface& check_in, "
   ^ "cradle::progress_reporter_interface& reporter, "
-  ^ "cradle::dynamic_list const& args) const " ^ "{ " ^ "if (args.size() != "
+  ^ "cradle::dynamic_array const& args) const " ^ "{ " ^ "if (args.size() != "
   ^ string_of_int (List.length f.function_parameters)
   ^ ") " ^ "throw cradle::exception(\"wrong number of arguments (expected "
   ^ string_of_int (List.length f.function_parameters)
-  ^ ")\"); " ^ "cradle::dynamic_list::const_iterator arg_i = args.begin(); "
+  ^ ")\"); " ^ "cradle::dynamic_array::const_iterator arg_i = args.begin(); "
   ^ String.concat ""
       (List.map
          (cpp_code_to_get_parameter_from_dynamic_list assignments)
