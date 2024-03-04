@@ -465,7 +465,7 @@ let union_hash_definitions namespace u =
     [
       "size_t invoke_hash(" ^ u.union_id ^ " const& x)";
       "{";
-      "using cradle::invoke_hash";
+      "using cradle::invoke_hash;";
       "switch (x.type)";
       "{";
       String.concat ""

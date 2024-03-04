@@ -888,7 +888,7 @@ let structure_hash_declaration namespace s =
         "size_t";
         "invoke_hash(" ^ full_structure_type s ^ " const& x)";
         "{";
-        "using cradle::invoke_hash";
+        "using cradle::invoke_hash;";
         ( match s.structure_super with
         | Some super -> "size_t h = invoke_hash(as_" ^ super ^ "(x));"
         | None -> "size_t h = 0;" );
@@ -909,7 +909,7 @@ let structure_hash_definition namespace s =
         "size_t";
         "invoke_hash(" ^ s.structure_id ^ " const& x)";
         "{";
-        "using cradle::invoke_hash";
+        "using cradle::invoke_hash;";
         ( match s.structure_super with
         | Some super -> "size_t h = invoke_hash(as_" ^ super ^ "(x));"
         | None -> "size_t h = 0;" );
