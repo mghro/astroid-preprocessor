@@ -458,23 +458,24 @@ let union_comparison_definitions u =
   ^ "} " ^ "return false; " ^ "} "
 
 let union_hash_declarations namespace u =
-  "size_t hash_value(" ^ u.union_id ^ " const& x);"
+  "size_t invoke_hash(" ^ u.union_id ^ " const& x);"
 
 let union_hash_definitions namespace u =
   cpp_code_lines
     [
-      "size_t hash_value(" ^ u.union_id ^ " const& x)";
+      "size_t invoke_hash(" ^ u.union_id ^ " const& x)";
       "{";
-      "    switch (x.type)";
-      "    {";
+      "using cradle::invoke_hash";
+      "switch (x.type)";
+      "{";
       String.concat ""
         (List.map
            (fun m ->
              "case "
              ^ cpp_enum_value_of_union_member u m
-             ^ ": " ^ "return cradle::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
+             ^ ": " ^ "return invoke_hash(as_" ^ m.um_id ^ "(x)); ")
            u.union_members);
-      "    }";
+      "}";
       "assert(0);";
       "return 0;";
       "}";

@@ -236,7 +236,7 @@ let enum_hash_declaration namespace e =
   cpp_code_lines
     [
       "inline size_t";
-      "hash_value(" ^ e.enum_id ^ " const& x)";
+      "invoke_hash(" ^ e.enum_id ^ " const& x)";
       "{";
       "    return size_t(x);";
       "}";

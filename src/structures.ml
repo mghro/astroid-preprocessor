@@ -880,21 +880,22 @@ let structure_subtyping_definitions env s =
 
 let structure_hash_declaration namespace s =
   if not (has_parameters s) then
-    cpp_code_lines [ "size_t"; "hash_value(" ^ s.structure_id ^ " const& x);" ]
+    cpp_code_lines [ "size_t"; "invoke_hash(" ^ s.structure_id ^ " const& x);" ]
   else
     cpp_code_lines
       [
         template_parameters_declaration s.structure_parameters;
         "size_t";
-        "hash_value(" ^ full_structure_type s ^ " const& x)";
+        "invoke_hash(" ^ full_structure_type s ^ " const& x)";
         "{";
+        "using cradle::invoke_hash";
         ( match s.structure_super with
-        | Some super -> "size_t h = cradle::invoke_hash(as_" ^ super ^ "(x));"
+        | Some super -> "size_t h = invoke_hash(as_" ^ super ^ "(x));"
         | None -> "size_t h = 0;" );
         String.concat ""
           (List.map
              (fun f ->
-               "boost::hash_combine(h, cradle::invoke_hash(x." ^ f.field_id
+               "boost::hash_combine(h, invoke_hash(x." ^ f.field_id
                ^ ")); ")
              s.structure_fields);
         "    return h;";
@@ -906,15 +907,16 @@ let structure_hash_definition namespace s =
     cpp_code_lines
       [
         "size_t";
-        "hash_value(" ^ s.structure_id ^ " const& x)";
+        "invoke_hash(" ^ s.structure_id ^ " const& x)";
         "{";
+        "using cradle::invoke_hash";
         ( match s.structure_super with
-        | Some super -> "size_t h = cradle::invoke_hash(as_" ^ super ^ "(x));"
+        | Some super -> "size_t h = invoke_hash(as_" ^ super ^ "(x));"
         | None -> "size_t h = 0;" );
         String.concat ""
           (List.map
              (fun f ->
-               "boost::hash_combine(h, cradle::invoke_hash(x." ^ f.field_id
+               "boost::hash_combine(h, invoke_hash(x." ^ f.field_id
                ^ ")); ")
              s.structure_fields);
         "return h;";
