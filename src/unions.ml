@@ -225,7 +225,7 @@ let construct_union_upgrade_function_options app_id u =
     [
       {
         parameter_id = "v";
-        parameter_type = [ Tid "cradle"; Tseparator; Tid "value" ];
+        parameter_type = [ Tid "cradle"; Tseparator; Tid "dynamic" ];
         parameter_description = "value to upgrade";
         parameter_by_reference = true;
       };

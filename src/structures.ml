@@ -322,7 +322,7 @@ let construct_function_options app_id label assignments s =
     [
       {
         parameter_id = "v";
-        parameter_type = [ Tid "cradle"; Tseparator; Tid "value" ];
+        parameter_type = [ Tid "cradle"; Tseparator; Tid "dynamic" ];
         parameter_description = "value to upgrade";
         parameter_by_reference = true;
       };
