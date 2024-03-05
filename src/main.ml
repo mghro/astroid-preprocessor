@@ -32,7 +32,7 @@ let hpp_string_of_declaration account_id type_app_id fun_app_id namespace env d
   | Dstructure s -> hpp_string_of_structure type_app_id namespace env s
   | Denum e -> hpp_string_of_enum account_id type_app_id namespace e
   | Dunion u -> hpp_string_of_union account_id type_app_id namespace u
-  | Dfunction f -> hpp_code_for_function account_id fun_app_id namespace f
+  | Dfunction f -> "" (* hpp_code_for_function account_id fun_app_id namespace f *)
   | Dprovider p -> ""
   | Dprevious_release_version ufv -> ""
   | Drecord r -> ""
@@ -59,7 +59,7 @@ let cpp_string_of_declaration account_id type_app_id fun_app_id namespace env d
       cpp_string_of_structure account_id type_app_id namespace env s
   | Denum e -> cpp_string_of_enum account_id type_app_id namespace e
   | Dunion u -> cpp_string_of_union account_id type_app_id namespace u
-  | Dfunction f -> cpp_code_to_define_function account_id fun_app_id namespace f
+  | Dfunction f -> "" (* cpp_code_to_define_function account_id fun_app_id namespace f *)
   | Dprovider p -> ""
   | Dprevious_release_version ufv -> ""
   | Drecord r -> ""
@@ -69,7 +69,7 @@ let cpp_string_of_declaration account_id type_app_id fun_app_id namespace env d
 
 let declaration_registration_code account_id type_app_id fun_app_id decl =
   match decl with
-  | Dfunction f -> cpp_code_to_register_function account_id fun_app_id f
+  | Dfunction f -> "" (* cpp_code_to_register_function account_id fun_app_id f *)
   | Dstructure s -> cpp_code_to_register_structure type_app_id s
   | Denum e -> cpp_code_to_register_enum type_app_id e
   | Dunion u -> cpp_code_to_register_union type_app_id u
