@@ -488,15 +488,15 @@ let cpp_function_redirection_code f assignments cpp_id public_id full_public_id
    function definition. *)
 let cpp_code_to_define_function account_id app_id namespace f =
   let instantiations = enumerate_combinations f.function_variants in
-
-  String.concat ""
+  ""
+  (* String.concat ""
     (List.map
        (fun (assignments, label) ->
          cpp_code_to_define_function_instance account_id app_id f label
            assignments)
-       instantiations)
+       instantiations) *)
   (* Define all the API instance redirections. *)
-  ^ concat_code_for_function_instances cpp_function_redirection_code f
+  (* ^ concat_code_for_function_instances cpp_function_redirection_code f *)
   (* Define the request interface. *)
   (* ^ define_request_interface_for_function account_id app_id f *)
   ^
@@ -517,13 +517,13 @@ let cpp_code_to_register_function_instance f label assignments =
   else ""
 
 (* Generate the C++ code to register a function as part of an API. *)
-let cpp_code_to_register_function account_id app_id f =
-  let instantiations = enumerate_combinations f.function_variants in
+let cpp_code_to_register_function account_id app_id f = ""
+  (* let instantiations = enumerate_combinations f.function_variants in
   String.concat ""
     (List.map
        (fun (assignments, label) ->
          cpp_code_to_register_function_instance f label assignments)
-       instantiations)
+       instantiations) *)
 
 (* Generate the interface necessary to construct typed calculation requests
    for this function instance. *)
@@ -596,7 +596,6 @@ let hpp_code_for_function account_id app_id namespace f =
   ^ ( if f.function_has_monitoring then delcare_non_monitored_redirection f
     else "" )
   (* Declare all the API instance redirections. *)
-  ^ concat_code_for_function_instances hpp_function_redirection_code f
-
-(* Create the request interface. *)
-(* ^ declare_request_interface_for_function account_id app_id f *)
+  (* ^ concat_code_for_function_instances hpp_function_redirection_code f *)
+  (* Create the request interface. *)
+  (* ^ declare_request_interface_for_function account_id app_id f *)
