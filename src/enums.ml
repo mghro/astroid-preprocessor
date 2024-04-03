@@ -236,10 +236,22 @@ let enum_hash_declaration namespace e =
   cpp_code_lines
     [
       "inline size_t";
-      "invoke_hash(" ^ e.enum_id ^ " const& x)";
+      "hash_value(" ^ e.enum_id ^ " const& x)";
       "{";
       "    return size_t(x);";
       "}";
+      "}"; (* Close namespace. *)
+      "template<>";
+      "struct std::hash<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
+      "{";
+      "size_t";
+      "operator()(" ^ namespace ^ "::" ^ e.enum_id ^ " const& x)";
+        "const noexcept";
+      "{";
+      "    return hash_value(x);";
+      "}";
+      "};";
+      "namespace " ^ namespace ^ " {";
     ]
 
 let enum_hash_definition namespace e = ""

@@ -458,14 +458,27 @@ let union_comparison_definitions u =
   ^ "} " ^ "return false; " ^ "} "
 
 let union_hash_declarations namespace u =
-  "size_t invoke_hash(" ^ u.union_id ^ " const& x);"
+  cpp_code_lines
+    [
+      "size_t";
+      "hash_value(" ^ u.union_id ^ " const& x);";
+      "}"; (* Close namespace. *)
+      "template<>";
+      "struct std::hash<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+      "size_t";
+      "operator()(" ^ namespace ^ "::" ^ u.union_id ^ " const& x)";
+        "const noexcept;";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
 
 let union_hash_definitions namespace u =
   cpp_code_lines
     [
-      "size_t invoke_hash(" ^ u.union_id ^ " const& x)";
+      "size_t";
+      "hash_value(" ^ u.union_id ^ " const& x)";
       "{";
-      "using cradle::invoke_hash;";
       "switch (x.type)";
       "{";
       String.concat ""
@@ -473,12 +486,21 @@ let union_hash_definitions namespace u =
            (fun m ->
              "case "
              ^ cpp_enum_value_of_union_member u m
-             ^ ": " ^ "return invoke_hash(as_" ^ m.um_id ^ "(x)); ")
+             ^ ": " ^ "return cradle::invoke_hash(as_" ^ m.um_id ^ "(x)); ")
            u.union_members);
       "}";
       "assert(0);";
       "return 0;";
       "}";
+      "}"; (* Close namespace. *)
+      "size_t";
+      "std::hash<" ^ namespace ^ "::" ^ u.union_id ^ ">::";
+      "operator()(" ^ namespace ^ "::" ^ u.union_id ^ " const& x)";
+        "const noexcept";
+      "{";
+      "return hash_value(x);";
+      "}";
+      "namespace " ^ namespace ^ " {";
     ]
 
 (* Generate C++ code to register API function for upgrading values *)
