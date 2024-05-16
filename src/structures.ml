@@ -955,6 +955,21 @@ let structure_hash_definition namespace s =
       ]
   else ""
 
+let structure_normalization_definition namespace s =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      template_parameters_declaration s.structure_parameters;
+      "struct cradle::normalization_uuid_str<" ^ (full_structure_type s) ^ ">";
+      "{";
+      "    static const inline std::string func{";
+      "        \"normalization<" ^ namespace ^ "::" ^ s.structure_id ^ ",func>\"};";
+      "    static const inline std::string coro{";
+      "        \"normalization<" ^ namespace ^ "::" ^ s.structure_id ^ ",coro>\"};";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 (* Generate all the C++ code that needs to appear in the header file for a
    structure. *)
 let hpp_string_of_structure app_id app_namespace env s =
@@ -974,6 +989,7 @@ let hpp_string_of_structure app_id app_namespace env s =
   ^ ( if structure_component_is_preexisting s "iostream" then ""
     else structure_iostream_declarations s )
   ^ structure_hash_declaration namespace s
+  ^ structure_normalization_definition namespace s
   ^ "} namespace " ^ app_namespace ^ " { "
 
 (* Generate all the C++ code that needs to appear in the .cpp file for a

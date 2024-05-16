@@ -503,6 +503,20 @@ let union_hash_definitions namespace u =
       "namespace " ^ namespace ^ " {";
     ]
 
+let union_normalization_definition namespace u =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+      "    static const inline std::string func{";
+      "        \"normalization<" ^ namespace ^ "::" ^ u.union_id ^ ",func>\"};";
+      "    static const inline std::string coro{";
+      "        \"normalization<" ^ namespace ^ "::" ^ u.union_id ^ ",coro>\"};";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 (* Generate C++ code to register API function for upgrading values *)
 let cpp_code_to_register_upgrade_function_instance u =
   let full_public_name = "upgrade_value_" ^ u.union_id in
@@ -520,6 +534,7 @@ let hpp_string_of_union account_id app_id namespace u =
   ^ union_swap_declaration u
   ^ union_conversion_declarations u
   ^ union_deep_sizeof_declaration u
+  ^ union_normalization_definition namespace u
 
 (* ^ union_upgrade_type_info_declaration u
    ^ union_auto_upgrade_value_declaration u

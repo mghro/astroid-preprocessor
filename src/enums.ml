@@ -332,6 +332,20 @@ let enum_deep_sizeof_definition e =
   "static inline size_t deep_sizeof(" ^ e.enum_id ^ ") " ^ "{ return sizeof("
   ^ e.enum_id ^ "); } "
 
+let enum_normalization_definition namespace e =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
+      "{";
+      "    static const inline std::string func{";
+      "        \"normalization<" ^ namespace ^ "::" ^ e.enum_id ^ ",func>\"};";
+      "    static const inline std::string coro{";
+      "        \"normalization<" ^ namespace ^ "::" ^ e.enum_id ^ ",coro>\"};";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 let hpp_string_of_enum account_id app_id namespace e =
   enum_declaration e
   ^ enum_type_info_declaration namespace e
@@ -339,6 +353,7 @@ let hpp_string_of_enum account_id app_id namespace e =
   ^ enum_hash_declaration namespace e
   ^ enum_query_declarations e
   ^ enum_conversion_declarations e
+  ^ enum_normalization_definition namespace e
 
 (* ^ enum_upgrade_type_declarations e
    ^ enum_upgrade_declaration e *)
