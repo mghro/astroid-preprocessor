@@ -960,7 +960,7 @@ let structure_normalization_definition namespace s =
     [
       "}"; (* Close namespace. *)
       template_parameters_declaration s.structure_parameters;
-      "struct cradle::normalization_uuid_str<" ^ (full_structure_type s) ^ ">";
+      "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ (full_structure_type s) ^ ">";
       "{";
       "    static const inline std::string func{";
       "        \"normalization<" ^ namespace ^ "::" ^ s.structure_id ^ ",func>\"};";
