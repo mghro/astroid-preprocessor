@@ -959,10 +959,10 @@ let structure_normalization_definition namespace s =
   cpp_code_lines
     [
       "}"; (* Close namespace. *)
-      if has_parameters s then
-        template_parameters_declaration s.structure_parameters;
-      else
-        "template<>";
+      (if has_parameters s then
+         template_parameters_declaration s.structure_parameters
+       else
+         "template<>");
       "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ (full_structure_type s) ^ ">";
       "{";
       "    static const inline std::string func{";
