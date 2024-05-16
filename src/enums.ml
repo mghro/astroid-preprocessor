@@ -336,6 +336,7 @@ let enum_normalization_definition namespace e =
   cpp_code_lines
     [
       "}"; (* Close namespace. *)
+      "template<>";
       "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ e.enum_id ^ ">";
       "{";
       "    static const inline std::string func{";

@@ -507,6 +507,7 @@ let union_normalization_definition namespace u =
   cpp_code_lines
     [
       "}"; (* Close namespace. *)
+      "template<>";
       "struct cradle::normalization_uuid_str<" ^ namespace ^ "::" ^ u.union_id ^ ">";
       "{";
       "    static const inline std::string func{";
