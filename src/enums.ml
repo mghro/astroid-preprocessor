@@ -351,7 +351,7 @@ let enum_msgpack_hook namespace e =
   cpp_code_lines
     [
       "}"; (* Close namespace. *)
-      "MSGPACK_ADD_ENUM(" ^ namespace ^ "::" ^ e.enum_id ^ ");"
+      "MSGPACK_ADD_ENUM(" ^ namespace ^ "::" ^ e.enum_id ^ ");";
       "namespace " ^ namespace ^ " {";
     ]
 
