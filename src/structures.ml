@@ -977,6 +977,21 @@ let structure_normalization_definition namespace s =
       "namespace " ^ namespace ^ " {";
     ]
 
+let structure_cereal_tag namespace s =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      (if has_parameters s then
+         template_parameters_declaration s.structure_parameters
+       else
+         "template<>");
+      "struct cradle::serializable_via_cereal<" ^ namespace ^ "::" ^ (full_structure_type s) ^ ">";
+      "{";
+      "    static constexpr bool value = true;";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 (* Generate all the C++ code that needs to appear in the header file for a
    structure. *)
 let hpp_string_of_structure app_id app_namespace env s =
@@ -997,6 +1012,7 @@ let hpp_string_of_structure app_id app_namespace env s =
     else structure_iostream_declarations s )
   ^ structure_hash_declaration namespace s
   ^ structure_normalization_definition namespace s
+  ^ structure_cereal_tag namespace s
   ^ "} namespace " ^ app_namespace ^ " { "
 
 (* Generate all the C++ code that needs to appear in the .cpp file for a
