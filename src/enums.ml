@@ -347,6 +347,14 @@ let enum_normalization_definition namespace e =
       "namespace " ^ namespace ^ " {";
     ]
 
+let enum_msgpack_hook namespace e =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      "MSGPACK_ADD_ENUM(" ^ namespace ^ "::" ^ e.enum_id ^ ");"
+      "namespace " ^ namespace ^ " {";
+    ]
+
 let hpp_string_of_enum account_id app_id namespace e =
   enum_declaration e
   ^ enum_type_info_declaration namespace e
@@ -355,6 +363,7 @@ let hpp_string_of_enum account_id app_id namespace e =
   ^ enum_query_declarations e
   ^ enum_conversion_declarations e
   ^ enum_normalization_definition namespace e
+  ^ enum_msgpack_hook namespace e
 
 (* ^ enum_upgrade_type_declarations e
    ^ enum_upgrade_declaration e *)

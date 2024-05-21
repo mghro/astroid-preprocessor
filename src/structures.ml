@@ -828,17 +828,21 @@ let structure_constructor_code s =
 let structure_declaration s =
   if structure_is_preexisting s then ""
   else
-    template_parameters_declaration s.structure_parameters
-    ^ "struct " ^ s.structure_id ^ " "
-    ^ ( match s.structure_super with
-      | Some super -> ": " ^ super ^ " "
-      | None -> "" )
-    ^ "{ "
-    ^ String.concat " "
-        (List.map (fun f -> field_declaration f ^ " ") s.structure_fields)
-    ^ " "
-    ^ structure_constructor_code s
-    ^ "}; "
+  cpp_code_lines
+    [
+      template_parameters_declaration s.structure_parameters;
+      "struct " ^ s.structure_id;
+      ( match s.structure_super with
+        | Some super -> ": " ^ super ^ " "
+        | None -> "" );
+      "{";
+      String.concat " "
+        (List.map (fun f -> field_declaration f ^ " ") s.structure_fields);
+      structure_constructor_code s;
+      "MSGPACK_DEFINE(" ^ (String.concat ", "
+        (List.map (fun f -> f.field_id) s.structure_fields)) ^ ")";
+      "};";
+    ]
 
 (* Generate a structure's "make" constructor. *)
 let structure_make_constructor_definition s =
