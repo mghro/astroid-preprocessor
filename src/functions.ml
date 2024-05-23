@@ -577,8 +577,8 @@ let define_cradle_interface_for_function_instance account_id app_id f
           (cpp_code_for_parameterized_type assignments
             (sanitize_return_type f.function_return_type)) ^ ">";
       "coro_" ^ full_public_id ^ "(";
-        "context_intf&,";
-      String.concat " "
+        "cradle::context_intf&,";
+      String.concat ","
         (List.map
           (fun p ->
             (cpp_code_for_parameterized_type assignments p.parameter_type)
@@ -587,7 +587,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
       ")";
       "{";
         "co_return " ^ full_public_id ^ "("
-        ^ String.concat ", "
+        ^ String.concat ","
             (List.map (fun p -> p.parameter_id) f.function_parameters)
         ^ ");";
       "}";
