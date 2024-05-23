@@ -594,7 +594,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
 
       "template<"
       ^ String.concat " "
-          (List.mapi (fun i _ -> "Arg" ^ (string_of_int i))
+          (List.mapi (fun i _ -> "class Arg" ^ (string_of_int i))
             f.function_parameters)
       ^ ">";
       "requires "
@@ -619,9 +619,9 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
         "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
         "std::string title{\"" ^ full_public_id ^ "\"};";
-        "return rq_function(";
-          "props_type{std::move(uuid), std::move(title)},";
-          app_id ^ "::coro_" ^ full_public_id
+        "return rq_function("
+          ^ "props_type{std::move(uuid), std::move(title)},"
+          ^ "coro_" ^ full_public_id ^ ","
           ^ String.concat ","
               (List.map
                 (fun p ->
@@ -635,7 +635,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
 
       "template<"
       ^ String.concat " "
-          (List.mapi (fun i _ -> "Arg" ^ (string_of_int i))
+          (List.mapi (fun i _ -> "class Arg" ^ (string_of_int i))
             f.function_parameters)
       ^ ">";
       "requires "
@@ -661,11 +661,11 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
         "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
         "std::string title{\"" ^ full_public_id ^ "\"};";
-        "return rq_proxy<" ^
-          (cpp_code_for_parameterized_type assignments
-            (sanitize_return_type f.function_return_type)) ^ ">(";
-          "props_type{std::move(uuid), std::move(title)},";
-          app_id ^ "::coro_" ^ full_public_id
+        "return rq_proxy<"
+          ^ (cpp_code_for_parameterized_type assignments
+              (sanitize_return_type f.function_return_type)) ^ ">("
+          ^ "props_type{std::move(uuid), std::move(title)},"
+          ^ "coro_" ^ full_public_id ^ ","
           ^ String.concat ","
               (List.map
                 (fun p ->
