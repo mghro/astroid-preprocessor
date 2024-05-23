@@ -593,7 +593,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
       "}";
 
       "template<"
-      ^ String.concat " "
+      ^ String.concat ","
           (List.mapi (fun i _ -> "class Arg" ^ (string_of_int i))
             f.function_parameters)
       ^ ">";
@@ -616,8 +616,8 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "using props_type = cradle::request_props<cradle::caching_level_type::" ^
           caching_level ^ ", cradle::request_function_t::coro, true>;";
         (* TODO: Include app/version info in UUID. *)
-        "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
-        "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
+        "cradle::request_uuid uuid{\"" ^ full_public_id ^ "\"};";
+        "uuid.set_level(cradle::caching_level_type::" ^ caching_level ^ ");";
         "std::string title{\"" ^ full_public_id ^ "\"};";
         "return rq_function("
           ^ "props_type{std::move(uuid), std::move(title)},"
@@ -634,7 +634,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
       "}";
 
       "template<"
-      ^ String.concat " "
+      ^ String.concat ","
           (List.mapi (fun i _ -> "class Arg" ^ (string_of_int i))
             f.function_parameters)
       ^ ">";
@@ -658,8 +658,8 @@ let define_cradle_interface_for_function_instance account_id app_id f
           "cradle::caching_level_type::none, " ^
           "cradle::request_function_t::proxy_coro, true>;";
         (* TODO: Include app/version info in UUID. *)
-        "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
-        "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
+        "cradle::request_uuid uuid{\"" ^ full_public_id ^ "\"};";
+        "uuid.set_level(cradle::caching_level_type::" ^ caching_level ^ ");";
         "std::string title{\"" ^ full_public_id ^ "\"};";
         "return rq_proxy<"
           ^ (cpp_code_for_parameterized_type assignments
