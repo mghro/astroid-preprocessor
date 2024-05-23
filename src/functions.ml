@@ -678,7 +678,6 @@ let define_cradle_interface_for_function_instance account_id app_id f
           ^ (cpp_code_for_parameterized_type assignments
               (sanitize_return_type f.function_return_type)) ^ ">("
           ^ "props_type{std::move(uuid), std::move(title)},"
-          ^ "coro_" ^ full_public_id ^ ","
           ^ String.concat ","
               (List.map
                 (fun p ->
