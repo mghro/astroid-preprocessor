@@ -346,6 +346,7 @@ let construct_function_options app_id label assignments s =
     function_return_description = "upgraded struct value for " ^ s.structure_id;
     function_body = None;
     function_has_monitoring = false;
+    function_uses_context = false;
     function_is_trivial = false;
     function_is_remote = true;
     function_is_internal = false;

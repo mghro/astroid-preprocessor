@@ -8,7 +8,7 @@ open Types
 %token LSQUARE RSQUARE LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token COLON DOUBLE_COLON SEMICOLON COMMA EQUALS PLUS MINUS AMPERSAND DOT
 %token STRUCT UNION ENUM TYPENAME CONST REVISION API FUNCTION NAME
-%token MONITORED TRIVIAL REMOTE EMPTY_COMMENT_STRING TEMPLATE
+%token MONITORED USES_CONTEXT TRIVIAL REMOTE EMPTY_COMMENT_STRING TEMPLATE
 %token CLASS UNSIGNED WITH ID_KEYWORD INTERNAL LEGACY MANUAL END PREEXISTING
 %token UPGRADE MUTATION DEPENDENCY PROVIDER PREVIOUS_RELEASE_VERSION DOUBLEQUOTES RECORD
 %token ACCOUNT APP VERSION STRUCTURE REPORTED
@@ -131,7 +131,7 @@ provider:
 
 previous_release_version:
   comment_string API LPAREN PREVIOUS_RELEASE_VERSION version_string RPAREN RPAREN
-  {{ version = $5 }}  
+  {{ version = $5 }}
 
 record:
   comment_string API LPAREN RECORD
@@ -350,6 +350,7 @@ nonempty_function_option_list:
 
 function_option:
     MONITORED { FOmonitored }
+  | USES_CONTEXT { FOuses_context }
   | TRIVIAL { FOtrivial }
   | REMOTE { FOremote }
   | INTERNAL { FOinternal }
@@ -396,6 +397,7 @@ cpp_id:
   | API { "api" }
   | FUNCTION { "fun" }
   | MONITORED { "monitored" }
+  | USES_CONTEXT { "uses_context" }
   | TRIVIAL { "trivial" }
   | REMOTE { "remote" }
   | REVISION { "revision" }

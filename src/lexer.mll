@@ -58,6 +58,7 @@ rule token = parse
   | "const"         { CONST }
   | "revision"      { REVISION }
   | "monitored"     { MONITORED }
+  | "uses_context"  { USES_CONTEXT }
   | "trivial"       { TRIVIAL }
   | "remote"        { REMOTE }
   | "template"      { TEMPLATE }
@@ -71,7 +72,7 @@ rule token = parse
   | "account("      { ACCOUNT }
   | "app("          { APP }
   | "version("      { VERSION }
-  | "previous_release("      
+  | "previous_release("
                     { PREVIOUS_RELEASE_VERSION }
   | "structure("    { STRUCTURE }
   | "dependency"    { DEPENDENCY }

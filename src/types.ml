@@ -149,6 +149,7 @@ type parameter = {
 type function_option =
   | FOvariants of template_instantiations list
   | FOmonitored
+  | FOuses_context
   | FOtrivial
   | FOremote
   | FOinternal
@@ -181,6 +182,7 @@ type function_declaration = {
   function_return_description : string;
   function_body : string option;
   function_has_monitoring : bool;
+  function_uses_context : bool;
   function_is_trivial : bool;
   function_is_remote : bool;
   function_is_internal : bool;

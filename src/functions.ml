@@ -17,6 +17,12 @@ let resolve_function_options f =
       options
   in
 
+  let has_context_option options =
+    List.exists
+      (fun o -> match o with FOuses_context -> true | _ -> false)
+      options
+  in
+
   let has_trivial_option options =
     List.exists (fun o -> match o with FOtrivial -> true | _ -> false) options
   in
@@ -168,6 +174,7 @@ let resolve_function_options f =
     function_return_description = f.ufd_return_description;
     function_body = f.ufd_body;
     function_has_monitoring = has_monitoring_option f.ufd_options;
+    function_uses_context = has_context_option f.ufd_options;
     function_is_trivial = has_trivial_option f.ufd_options;
     function_is_remote = has_remote_option f.ufd_options;
     function_is_internal = has_internal_option f.ufd_options;
@@ -392,6 +399,10 @@ let cpp_function_definition f is_static id body =
       "check_in_interface& check_in," ^ "progress_reporter_interface& reporter"
       ^ match f.function_parameters with [] -> "" | _ -> ","
     else "" )
+  ^ ( if f.function_uses_context then
+      "cradle::context_intf& ctx"
+      ^ match f.function_parameters with [] -> "" | _ -> ","
+    else "" )
   ^ String.concat ","
       (List.map
          (fun p ->
@@ -577,7 +588,8 @@ let define_cradle_interface_for_function_instance account_id app_id f
           (cpp_code_for_parameterized_type assignments
             (sanitize_return_type f.function_return_type)) ^ ">";
       "coro_" ^ full_public_id ^ "(";
-        "cradle::context_intf&,";
+        "cradle::context_intf&"
+        ^ (if f.function_uses_context then "ctx" else "") ^ ",";
       String.concat ","
         (List.map
           (fun p ->
@@ -587,6 +599,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
       ")";
       "{";
         "co_return " ^ f.function_id ^ "("
+        ^ (if f.function_uses_context then "ctx," else "")
         ^ String.concat ","
             (List.map (fun p -> p.parameter_id) f.function_parameters)
         ^ ");";
