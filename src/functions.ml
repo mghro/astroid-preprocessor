@@ -413,6 +413,9 @@ let hpp_function_declaration f id =
     else "; " )
 
 (* Generate the definition of the request interface to function instance. *)
+(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
+   be useful to make it work for hooking functions up to Thinknode, but for now
+   it's not used. *)
 let define_request_interface_for_function_instance account_id app_id f
     assignments cpp_id public_id full_public_id =
   "cradle::request<"
@@ -453,6 +456,9 @@ let concat_code_for_function_instances generator f =
        instantiations)
 
 (* Generate the definition of the request interface to a function. *)
+(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
+   be useful to make it work for hooking functions up to Thinknode, but for now
+   it's not used. *)
 let define_request_interface_for_function account_id app_id f =
   concat_code_for_function_instances
     (define_request_interface_for_function_instance account_id app_id)
@@ -527,7 +533,11 @@ let cpp_code_to_register_function account_id app_id f = ""
 
 (* Generate the interface necessary to construct typed calculation requests
    for this function instance. *)
-let declare_request_interface_for_function_instance account_id app_id f
+(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
+   be useful to make it work for hooking functions up to Thinknode, but for now
+   it's not used. *)
+let declare_request_interface_for_function_instance
+account_id app_id f
     assignments cpp_id public_id full_public_id =
   "cradle::request<"
   ^ cpp_code_for_parameterized_type assignments
@@ -544,9 +554,135 @@ let declare_request_interface_for_function_instance account_id app_id f
 
 (* Generate the interface necessary to construct typed calculation requests for
    this function. *)
+(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
+   be useful to make it work for hooking functions up to Thinknode, but for now
+   it's not used. *)
 let declare_request_interface_for_function account_id app_id f =
   concat_code_for_function_instances
     (declare_request_interface_for_function_instance account_id app_id)
+    f
+
+(* Generate the interface necessary to construct CRADLE calculation requests
+   for this function instance. *)
+let define_cradle_interface_for_function_instance account_id app_id f
+    assignments cpp_id public_id full_public_id =
+  let caching_level =
+    if f.function_is_trivial then "none"
+    else if f.function_is_disk_cached then "full"
+    else "memory"
+  in
+  cpp_code_lines
+    [
+      "inline cppcoro::task<" ^
+          (cpp_code_for_parameterized_type assignments
+            (sanitize_return_type f.function_return_type)) ^ ">";
+      "coro_" ^ full_public_id ^ "(";
+        "context_intf&,";
+      String.concat " "
+        (List.map
+          (fun p ->
+            (cpp_code_for_parameterized_type assignments p.parameter_type)
+            ^ " " ^ p.parameter_id)
+          f.function_parameters);
+      ")";
+      "{";
+        "co_return " ^ full_public_id ^ "("
+        ^ String.concat ", "
+            (List.map (fun p -> p.parameter_id) f.function_parameters)
+        ^ ");";
+      "}";
+
+      "template<"
+      ^ String.concat " "
+          (List.mapi (fun i _ -> "Arg" ^ (string_of_int i))
+            f.function_parameters)
+      ^ ">";
+      "requires "
+      ^ String.concat " && "
+          (List.mapi
+            (fun i p ->
+              "cradle::TypedArg<Arg" ^ (string_of_int i) ^ "," ^
+              (cpp_code_for_parameterized_type assignments p.parameter_type) ^
+              ">")
+            f.function_parameters);
+      "auto";
+      "rq_" ^ full_public_id ^ "("
+      ^ String.concat ", "
+          (List.mapi
+            (fun i p -> "Arg" ^ (string_of_int i) ^ " " ^ p.parameter_id)
+            f.function_parameters)
+      ^ ")";
+      "{";
+        "using props_type = cradle::request_props<cradle::caching_level_type::" ^
+          caching_level ^ ", cradle::request_function_t::coro, true>;";
+        (* TODO: Include app/version info in UUID. *)
+        "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
+        "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
+        "std::string title{\"" ^ full_public_id ^ "\"};";
+        "return rq_function(";
+          "props_type{std::move(uuid), std::move(title)},";
+          app_id ^ "::coro_" ^ full_public_id
+          ^ String.concat ","
+              (List.map
+                (fun p ->
+                  "normalize_arg<" ^
+                    (cpp_code_for_parameterized_type assignments
+                      p.parameter_type) ^ ", props_type>(std::move(" ^
+                    p.parameter_id ^ "))")
+                f.function_parameters)
+          ^ ");";
+      "}";
+
+      "template<"
+      ^ String.concat " "
+          (List.mapi (fun i _ -> "Arg" ^ (string_of_int i))
+            f.function_parameters)
+      ^ ">";
+      "requires "
+      ^ String.concat " && "
+          (List.mapi
+            (fun i p ->
+              "cradle::TypedArg<Arg" ^ (string_of_int i) ^ "," ^
+              (cpp_code_for_parameterized_type assignments p.parameter_type) ^
+              ">")
+            f.function_parameters);
+      "auto";
+      "rq_proxy_" ^ full_public_id ^ "("
+      ^ String.concat ", "
+          (List.mapi
+            (fun i p -> "Arg" ^ (string_of_int i) ^ " " ^ p.parameter_id)
+            f.function_parameters)
+      ^ ")";
+      "{";
+        "using props_type = cradle::request_props<" ^
+          "cradle::caching_level_type::none, " ^
+          "cradle::request_function_t::proxy_coro, true>;";
+        (* TODO: Include app/version info in UUID. *)
+        "request_uuid uuid{\"" ^ full_public_id ^ "\"};";
+        "uuid.set_level(caching_level_type::" ^ caching_level ^ ");";
+        "std::string title{\"" ^ full_public_id ^ "\"};";
+        "return rq_proxy<" ^
+          (cpp_code_for_parameterized_type assignments
+            (sanitize_return_type f.function_return_type)) ^ ">(";
+          "props_type{std::move(uuid), std::move(title)},";
+          app_id ^ "::coro_" ^ full_public_id
+          ^ String.concat ","
+              (List.map
+                (fun p ->
+                  "normalize_arg<" ^
+                    (cpp_code_for_parameterized_type assignments
+                      p.parameter_type) ^ ", props_type>(std::move(" ^
+                    p.parameter_id ^ "))")
+                f.function_parameters)
+          ^ ");";
+      "}";
+    ]
+
+(* Generate the interface necessary to construct typed calculation requests for
+   this function. *)
+let define_cradle_interface_for_function account_id app_id f =
+  concat_code_for_function_instances
+    (define_cradle_interface_for_function_instance account_id app_id)
     f
 
 (* Generate the header file code to redirect an API instance of a function to
@@ -599,3 +735,4 @@ let hpp_code_for_function account_id app_id namespace f =
   (* ^ concat_code_for_function_instances hpp_function_redirection_code f *)
   (* Create the request interface. *)
   (* ^ declare_request_interface_for_function account_id app_id f *)
+  ^ define_cradle_interface_for_function account_id app_id f
