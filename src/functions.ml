@@ -586,7 +586,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
           f.function_parameters);
       ")";
       "{";
-        "co_return " ^ full_public_id ^ "("
+        "co_return " ^ f.function_id ^ "("
         ^ String.concat ","
             (List.map (fun p -> p.parameter_id) f.function_parameters)
         ^ ");";
