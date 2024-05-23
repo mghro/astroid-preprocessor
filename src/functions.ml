@@ -400,7 +400,7 @@ let cpp_function_definition f is_static id body =
       ^ match f.function_parameters with [] -> "" | _ -> ","
     else "" )
   ^ ( if f.function_uses_context then
-      "cradle::context_intf& ctx"
+      "cradle::local_context_intf& ctx"
       ^ match f.function_parameters with [] -> "" | _ -> ","
     else "" )
   ^ String.concat ","
@@ -589,7 +589,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
             (sanitize_return_type f.function_return_type)) ^ ">";
       "coro_" ^ full_public_id ^ "(";
         "cradle::context_intf&"
-        ^ (if f.function_uses_context then "ctx" else "") ^ ",";
+        ^ (if f.function_uses_context then "generic_ctx" else "") ^ ",";
       String.concat ","
         (List.map
           (fun p ->
@@ -598,11 +598,16 @@ let define_cradle_interface_for_function_instance account_id app_id f
           f.function_parameters);
       ")";
       "{";
-        "co_return " ^ f.function_id ^ "("
+        (if f.function_uses_context
+          then "auto& ctx = cradle::cast_ctx_to_ref<cradle::local_context_intf>(generic_ctx);"
+          else "");
+        "auto result = " ^ f.function_id ^ "("
         ^ (if f.function_uses_context then "ctx," else "")
         ^ String.concat ","
             (List.map (fun p -> p.parameter_id) f.function_parameters)
         ^ ");";
+        (if f.function_uses_context then "ctx.on_value_complete();" else "");
+        "co_return result;";
       "}";
 
       "template<"
