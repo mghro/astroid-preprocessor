@@ -840,8 +840,13 @@ let structure_declaration s =
       String.concat " "
         (List.map (fun f -> field_declaration f ^ " ") s.structure_fields);
       structure_constructor_code s;
-      "MSGPACK_DEFINE(" ^ (String.concat ", "
-        (List.map (fun f -> f.field_id) s.structure_fields)) ^ ")";
+      "MSGPACK_DEFINE("
+        ^ ( match s.structure_super with
+            | Some super -> "MSGPACK_BASE(" ^ super ^ "), "
+            | None -> "" )
+        ^ (String.concat ", "
+          (List.map (fun f -> f.field_id) s.structure_fields))
+        ^ ")";
       "};";
     ]
 
