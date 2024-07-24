@@ -643,7 +643,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
           ^ String.concat ","
               (List.map
                 (fun p ->
-                  "normalize_arg<" ^
+                  "cradle::normalize_arg<" ^
                     (cpp_code_for_parameterized_type assignments
                       p.parameter_type) ^ ", props_type>(std::move(" ^
                     p.parameter_id ^ "))")
@@ -679,14 +679,14 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "cradle::request_uuid uuid{\"" ^ full_public_id ^ "\"};";
         "uuid.set_level(cradle::caching_level_type::" ^ caching_level ^ ");";
         "std::string title{\"" ^ full_public_id ^ "\"};";
-        "return rq_proxy<"
+        "return cradle::rq_proxy<"
           ^ (cpp_code_for_parameterized_type assignments
               (sanitize_return_type f.function_return_type)) ^ ">("
           ^ "props_type{std::move(uuid), std::move(title)},"
           ^ String.concat ","
               (List.map
                 (fun p ->
-                  "normalize_arg<" ^
+                  "cradle::normalize_arg<" ^
                     (cpp_code_for_parameterized_type assignments
                       p.parameter_type) ^ ", props_type>(std::move(" ^
                     p.parameter_id ^ "))")
