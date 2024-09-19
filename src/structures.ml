@@ -795,36 +795,6 @@ let structure_deep_sizeof_implementation s =
     ^ "; " ^ "} "
   else ""
 
-(* Generate the C++ code for a default constructor and a constructor taking
-   a value for each field. *)
-let structure_constructor_code s =
-  (* default constructor *)
-  s.structure_id ^ "() " ^ "{} "
-  (* field-by-field constructor *)
-  ^
-  if List.length s.structure_fields > 0 then
-    (* If there's only one field, we need to add 'explicit' so that C++
-       doesn't mistake this for a conversion from the field type. *)
-    (if List.length s.structure_fields == 1 then "explicit " else "")
-    ^ s.structure_id ^ "("
-    ^ ( match s.structure_super with
-      | Some super -> super ^ " const& super, "
-      | None -> "" )
-    ^ String.concat ", "
-        (List.map
-           (fun f -> cpp_code_for_type f.field_type ^ " const& " ^ f.field_id)
-           s.structure_fields)
-    ^ ") : "
-    ^ ( match s.structure_super with
-      | Some super -> super ^ "(super), "
-      | None -> "" )
-    ^ String.concat ", "
-        (List.map
-           (fun f -> f.field_id ^ "(" ^ f.field_id ^ ")")
-           s.structure_fields)
-    ^ " {} "
-  else ""
-
 (* Generate the full declaration for a structure. *)
 let structure_declaration s =
   if structure_is_preexisting s then ""
@@ -839,7 +809,6 @@ let structure_declaration s =
       "{";
       String.concat " "
         (List.map (fun f -> field_declaration f ^ " ") s.structure_fields);
-      structure_constructor_code s;
       "MSGPACK_DEFINE("
         ^ ( match s.structure_super with
             | Some super -> "MSGPACK_BASE(" ^ super ^ "), "
