@@ -324,7 +324,7 @@ let construct_function_options app_id label assignments s =
         parameter_id = "v";
         parameter_type = [ Tid "cradle"; Tseparator; Tid "dynamic" ];
         parameter_description = "value to upgrade";
-        parameter_by_reference = true;
+        parameter_by_reference = PRnone;
       };
     ]
   in
@@ -346,7 +346,7 @@ let construct_function_options app_id label assignments s =
     function_return_description = "upgraded struct value for " ^ s.structure_id;
     function_body = None;
     function_has_monitoring = false;
-    function_uses_context = false;
+    function_context_type = None;
     function_is_trivial = false;
     function_is_remote = true;
     function_is_internal = false;

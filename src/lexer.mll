@@ -58,7 +58,6 @@ rule token = parse
   | "const"         { CONST }
   | "revision"      { REVISION }
   | "monitored"     { MONITORED }
-  | "uses_context"  { USES_CONTEXT }
   | "trivial"       { TRIVIAL }
   | "remote"        { REMOTE }
   | "template"      { TEMPLATE }

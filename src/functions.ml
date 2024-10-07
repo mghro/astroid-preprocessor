@@ -8,18 +8,14 @@ open Utilities
    instead. *)
 let sanitize_return_type t = if is_void t then [ Tid "nil_type" ] else t
 
+exception InvalidNonconstReferenceParameter
+
 (* Given an unresolved_function_declaration, this resolves all the function
    options and returns a normal function_declaration. *)
 let resolve_function_options f =
   let has_monitoring_option options =
     List.exists
       (fun o -> match o with FOmonitored -> true | _ -> false)
-      options
-  in
-
-  let has_context_option options =
-    List.exists
-      (fun o -> match o with FOuses_context -> true | _ -> false)
       options
   in
 
@@ -164,17 +160,42 @@ let resolve_function_options f =
         | _ -> get_level_option rest )
   in
 
+  let (context_type, pure_parameters) =
+    match f.ufd_parameters with
+    | [] ->
+        (None, [])
+    | p :: rest ->
+       (match p.parameter_by_reference with
+        | PRnonconst ->
+            if p.parameter_id == "ctx" then
+              (Some p.parameter_type, rest)
+            else
+              raise InvalidNonconstReferenceParameter
+        | _ -> (None, p :: rest))
+  in
+
+  let rec validate_parameters parameters =
+    match parameters with
+    | [] -> ()
+    | p :: rest ->
+        match p.parameter_by_reference with
+        | PRnonconst -> raise InvalidNonconstReferenceParameter
+        | _ -> (validate_parameters rest)
+  in
+
+  let _ = (validate_parameters pure_parameters) in
+
   {
     function_variants = get_variants_option f.ufd_options;
     function_id = f.ufd_id;
     function_description = f.ufd_description;
     function_template_parameters = f.ufd_template_parameters;
-    function_parameters = f.ufd_parameters;
+    function_parameters = pure_parameters;
     function_return_type = f.ufd_return_type;
     function_return_description = f.ufd_return_description;
     function_body = f.ufd_body;
     function_has_monitoring = has_monitoring_option f.ufd_options;
-    function_uses_context = has_context_option f.ufd_options;
+    function_context_type = context_type;
     function_is_trivial = has_trivial_option f.ufd_options;
     function_is_remote = has_remote_option f.ufd_options;
     function_is_internal = has_internal_option f.ufd_options;
@@ -399,16 +420,20 @@ let cpp_function_definition f is_static id body =
       "check_in_interface& check_in," ^ "progress_reporter_interface& reporter"
       ^ match f.function_parameters with [] -> "" | _ -> ","
     else "" )
-  ^ ( if f.function_uses_context then
-      "cradle::local_context_intf& ctx"
-      ^ match f.function_parameters with [] -> "" | _ -> ","
-    else "" )
+  ^ ( match f.function_context_type with
+      | Some context_type ->
+        (cpp_code_for_type context_type) ^ "& ctx"
+        ^ (match f.function_parameters with [] -> "" | _ -> ",")
+      | None -> "")
   ^ String.concat ","
       (List.map
          (fun p ->
            cpp_code_for_type p.parameter_type
            ^ " "
-           ^ (if p.parameter_by_reference then "const&" else "")
+           ^ (match p.parameter_by_reference with
+              | PRconst -> "const&"
+              | PRnonconst -> "&"
+              | PRnone -> "")
            ^ " " ^ p.parameter_id)
          f.function_parameters)
   ^ ") " ^ body
@@ -589,7 +614,9 @@ let define_cradle_interface_for_function_instance account_id app_id f
             (sanitize_return_type f.function_return_type)) ^ ">";
       "coro_" ^ full_public_id ^ "(";
         "cradle::context_intf&"
-        ^ (if f.function_uses_context then "generic_ctx" else "") ^ ",";
+        ^ (match f.function_context_type with
+           | Some _ -> "generic_ctx"
+           | None -> "") ^ ",";
       String.concat ","
         (List.map
           (fun p ->
@@ -598,15 +625,21 @@ let define_cradle_interface_for_function_instance account_id app_id f
           f.function_parameters);
       ")";
       "{";
-        (if f.function_uses_context
-          then "auto& ctx = cradle::cast_ctx_to_ref<cradle::local_context_intf>(generic_ctx);"
-          else "");
+        (match f.function_context_type with
+           | Some context_type ->
+              ("auto& ctx = cradle::cast_ctx_to_ref<" ^
+               (cpp_code_for_type context_type) ^ ">(generic_ctx);")
+           | None -> "") ^ ",";
         "auto result = " ^ f.function_id ^ "("
-        ^ (if f.function_uses_context then "ctx," else "")
+        ^ (match f.function_context_type with
+           | Some _ -> "ctx,"
+           | None -> "")
         ^ String.concat ","
             (List.map (fun p -> p.parameter_id) f.function_parameters)
         ^ ");";
-        (if f.function_uses_context then "ctx.on_value_complete();" else "");
+        (match f.function_context_type with
+           | Some _ -> "ctx.on_value_complete();"
+           | None -> "");
         "co_return result;";
       "}";
 
@@ -731,7 +764,10 @@ let delcare_non_monitored_redirection f =
          (fun p ->
            cpp_code_for_type p.parameter_type
            ^ " "
-           ^ (if p.parameter_by_reference then "const&" else "")
+           ^ (match p.parameter_by_reference with
+              | PRconst -> "const&"
+              | PRnonconst -> "&"
+              | PRnone -> "")
            ^ " " ^ p.parameter_id)
          f.function_parameters)
   ^ ") " ^ "{ " ^ "null_check_in check_in; "

@@ -139,17 +139,18 @@ type union = {
    The resolved version is what's used to generate the output.
    (The reason for the distinction is more historical than anything else.) *)
 
+type parameter_reference_type = PRconst | PRnonconst | PRnone
+
 type parameter = {
   parameter_id : string;
   parameter_type : type_string;
   parameter_description : string;
-  parameter_by_reference : bool;
+  parameter_by_reference : parameter_reference_type;
 }
 
 type function_option =
   | FOvariants of template_instantiations list
   | FOmonitored
-  | FOuses_context
   | FOtrivial
   | FOremote
   | FOinternal
@@ -182,7 +183,7 @@ type function_declaration = {
   function_return_description : string;
   function_body : string option;
   function_has_monitoring : bool;
-  function_uses_context : bool;
+  function_context_type : type_string option;
   function_is_trivial : bool;
   function_is_remote : bool;
   function_is_internal : bool;

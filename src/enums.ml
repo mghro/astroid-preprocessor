@@ -138,7 +138,7 @@ let construct_function_options app_id e =
         parameter_id = "v";
         parameter_type = [ Tid "cradle"; Tseparator; Tid "dynamic" ];
         parameter_description = "value to upgrade";
-        parameter_by_reference = true;
+        parameter_by_reference = PRnone;
       };
     ]
   in
@@ -151,9 +151,9 @@ let construct_function_options app_id e =
     function_parameters = make_function_parameter e;
     function_return_type = make_return_type e;
     function_return_description = "upgraded value for " ^ e.enum_id;
+    function_context_type = None;
     function_body = None;
     function_has_monitoring = false;
-    function_uses_context = false;
     function_is_trivial = false;
     function_is_remote = true;
     function_is_internal = false;

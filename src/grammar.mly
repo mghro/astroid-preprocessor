@@ -8,7 +8,7 @@ open Types
 %token LSQUARE RSQUARE LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token COLON DOUBLE_COLON SEMICOLON COMMA EQUALS PLUS MINUS AMPERSAND DOT
 %token STRUCT UNION ENUM TYPENAME CONST REVISION API FUNCTION NAME
-%token MONITORED USES_CONTEXT TRIVIAL REMOTE EMPTY_COMMENT_STRING TEMPLATE
+%token MONITORED TRIVIAL REMOTE EMPTY_COMMENT_STRING TEMPLATE
 %token CLASS UNSIGNED WITH ID_KEYWORD INTERNAL LEGACY MANUAL END PREEXISTING
 %token UPGRADE MUTATION DEPENDENCY PROVIDER PREVIOUS_RELEASE_VERSION DOUBLEQUOTES RECORD
 %token ACCOUNT APP VERSION STRUCTURE REPORTED
@@ -64,7 +64,7 @@ open Types
 %type <Types.parameter list> parameter_list
 %type <Types.parameter list> nonempty_parameter_list
 %type <Types.parameter> parameter
-%type <bool> parameter_by_reference
+%type <Types.parameter_reference_type> parameter_by_reference
 %type <string> cpp_id
 %type <Types.provider> provider
 %type <Types.previous_release_version> previous_release_version
@@ -350,7 +350,6 @@ nonempty_function_option_list:
 
 function_option:
     MONITORED { FOmonitored }
-  | USES_CONTEXT { FOuses_context }
   | TRIVIAL { FOtrivial }
   | REMOTE { FOremote }
   | INTERNAL { FOinternal }
@@ -388,8 +387,9 @@ parameter:
         parameter_by_reference = $3 } }
 
 parameter_by_reference:
-    { false }
-  | CONST AMPERSAND { true }
+    { PRnone }
+  | CONST AMPERSAND { PRconst }
+  | AMPERSAND { PRnonconst }
 
 cpp_id:
     ID { $1 }
@@ -397,7 +397,6 @@ cpp_id:
   | API { "api" }
   | FUNCTION { "fun" }
   | MONITORED { "monitored" }
-  | USES_CONTEXT { "uses_context" }
   | TRIVIAL { "trivial" }
   | REMOTE { "remote" }
   | REVISION { "revision" }
