@@ -629,7 +629,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
            | Some context_type ->
               ("auto& ctx = cradle::cast_ctx_to_ref<" ^
                (cpp_code_for_type context_type) ^ ">(generic_ctx);")
-           | None -> "") ^ ",";
+           | None -> "");
         "auto result = " ^ f.function_id ^ "("
         ^ (match f.function_context_type with
            | Some _ -> "ctx,"
