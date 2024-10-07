@@ -167,7 +167,7 @@ let resolve_function_options f =
     | p :: rest ->
        (match p.parameter_by_reference with
         | PRnonconst ->
-            if p.parameter_id == "ctx" then
+            if p.parameter_id = "ctx" then
               (Some p.parameter_type, rest)
             else
               raise InvalidNonconstReferenceParameter
