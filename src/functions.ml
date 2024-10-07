@@ -8,6 +8,16 @@ open Utilities
    instead. *)
 let sanitize_return_type t = if is_void t then [ Tid "nil_type" ] else t
 
+(* Get the actual return *value* type of a function, which is nested for
+coroutines. *)
+let return_value_type f =
+  let sanitized = sanitize_return_type f.function_return_type in
+  if f.function_is_coro then
+    sanitized @ [ Tseparator; Tid "value_type" ]
+  else
+    sanitized
+
+
 exception InvalidNonconstReferenceParameter
 
 (* Given an unresolved_function_declaration, this resolves all the function
@@ -339,8 +349,7 @@ let cpp_code_to_define_function_instance account_id app_id f label assignments =
       f.function_parameters
   ^ "using cradle::get_type_info; "
   ^ "type_info.returns.schema = make_api_type_info(get_type_info("
-  ^ cpp_code_for_parameterized_type assignments
-      (sanitize_return_type f.function_return_type)
+  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
   ^ "())); " ^ "type_info.returns.description = \""
   ^ String.escaped f.function_return_description
   ^ "\"; "
@@ -456,8 +465,7 @@ let hpp_function_declaration f id =
 let define_request_interface_for_function_instance account_id app_id f
     assignments cpp_id public_id full_public_id =
   "cradle::request<"
-  ^ cpp_code_for_parameterized_type assignments
-      (sanitize_return_type f.function_return_type)
+  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
   ^ " > " ^ "rq_" ^ public_id ^ "("
   ^ String.concat ", "
       (List.map
@@ -474,8 +482,7 @@ let define_request_interface_for_function_instance account_id app_id f
            "calc_spec_.args.push_back(" ^ p.parameter_id ^ "_request.untyped); ")
          f.function_parameters)
   ^ "auto function_request_ = cradle::make_typed_request<"
-  ^ cpp_code_for_parameterized_type assignments
-      (sanitize_return_type f.function_return_type)
+  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
   ^ " >(request_type::FUNCTION, calc_spec_); "
   ^ ( if f.function_is_remote then "return rq_remote(function_request_); "
     else "return function_request_; " )
@@ -577,8 +584,7 @@ let declare_request_interface_for_function_instance
 account_id app_id f
     assignments cpp_id public_id full_public_id =
   "cradle::request<"
-  ^ cpp_code_for_parameterized_type assignments
-      (sanitize_return_type f.function_return_type)
+  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
   ^ " > " ^ "rq_" ^ public_id ^ "("
   ^ String.concat ", "
       (List.map
@@ -615,7 +621,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
           [
             "inline cppcoro::task<" ^
                 (cpp_code_for_parameterized_type assignments
-                  (sanitize_return_type f.function_return_type)) ^ ">";
+                  (return_value_type f)) ^ ">";
             "coro_" ^ full_public_id ^ "(";
               "cradle::context_intf&"
               ^ (match f.function_context_type with
@@ -721,7 +727,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "std::string title{\"" ^ full_public_id ^ "\"};";
         "return cradle::rq_proxy<"
           ^ (cpp_code_for_parameterized_type assignments
-              (sanitize_return_type f.function_return_type)) ^ ">("
+              (return_value_type f)) ^ ">("
           ^ "props_type{std::move(uuid), std::move(title)},"
           ^ String.concat ","
               (List.map
