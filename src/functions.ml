@@ -13,7 +13,7 @@ coroutines. *)
 let return_value_type f =
   let sanitized = sanitize_return_type f.function_return_type in
   if f.function_is_coro then
-    sanitized @ [ Tseparator; Tid "value_type" ]
+    (List.append sanitized [Tseparator; Tid "value_type" ])
   else
     sanitized
 
