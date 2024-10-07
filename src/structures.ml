@@ -338,6 +338,7 @@ let construct_function_options app_id label assignments s =
 
   {
     function_variants = [];
+    function_is_coro = false;
     function_id = "upgrade_value_" ^ s.structure_id ^ label;
     function_description = "upgrade struct function for " ^ s.structure_id;
     function_template_parameters = [];

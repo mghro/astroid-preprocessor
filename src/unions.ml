@@ -234,6 +234,7 @@ let construct_union_upgrade_function_options app_id u =
   let make_return_type s = [ Tid u.union_id ] in
   {
     function_variants = [];
+    function_is_coro = false;
     function_id = "upgrade_value_" ^ u.union_id;
     function_description = "upgrade union function for " ^ u.union_id;
     function_template_parameters = [];

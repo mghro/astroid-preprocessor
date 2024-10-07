@@ -51,6 +51,7 @@ rule token = parse
   | "api"           { API }
   | "id"            { ID_KEYWORD }
   | "fun"           { FUNCTION }
+  | "coro"          { CORO }
   | "struct"        { STRUCT }
   | "union"         { UNION }
   | "enum"          { ENUM }

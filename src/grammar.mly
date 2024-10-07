@@ -7,7 +7,7 @@ open Types
 
 %token LSQUARE RSQUARE LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE
 %token COLON DOUBLE_COLON SEMICOLON COMMA EQUALS PLUS MINUS AMPERSAND DOT
-%token STRUCT UNION ENUM TYPENAME CONST REVISION API FUNCTION NAME
+%token STRUCT UNION ENUM TYPENAME CONST REVISION API FUNCTION CORO NAME
 %token MONITORED TRIVIAL REMOTE EMPTY_COMMENT_STRING TEMPLATE
 %token CLASS UNSIGNED WITH ID_KEYWORD INTERNAL LEGACY MANUAL END PREEXISTING
 %token UPGRADE MUTATION DEPENDENCY PROVIDER PREVIOUS_RELEASE_VERSION DOUBLEQUOTES RECORD
@@ -53,6 +53,7 @@ open Types
 %type <Types.type_string list> type_string_list
 %type <Types.type_string list> nonempty_type_string_list
 %type <Types.type_string> type_string
+%type <bool> function_tag
 %type <Types.unresolved_function_declaration> function_declaration
 %type <Types.function_option> function_option
 %type <Types.function_option list> function_option_list
@@ -320,14 +321,19 @@ type_string:
   | type_string LBRACKET type_string_list RBRACKET
     { (List.append $1 [Tparameters $3]) }
 
+function_tag:
+    FUNCTION { false }
+  | CORO { true }
+
 function_declaration:
     comment_string
-    API LPAREN FUNCTION function_option_list RPAREN
+    API LPAREN function_tag function_option_list RPAREN
     template_parameter_list
     comment_string
     type_string ID
     LPAREN parameter_list RPAREN optional_semicolon
-    { { ufd_id = $10;
+    { { ufd_is_coro = $4;
+        ufd_id = $10;
         ufd_description = $1;
         ufd_template_parameters = $7;
         ufd_parameters = $12;
@@ -396,6 +402,7 @@ cpp_id:
   | ID_KEYWORD { "id" }
   | API { "api" }
   | FUNCTION { "fun" }
+  | CORO { "coro" }
   | MONITORED { "monitored" }
   | TRIVIAL { "trivial" }
   | REMOTE { "remote" }

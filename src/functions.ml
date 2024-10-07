@@ -196,6 +196,7 @@ let resolve_function_options f =
     function_body = f.ufd_body;
     function_has_monitoring = has_monitoring_option f.ufd_options;
     function_context_type = context_type;
+    function_is_coro = f.ufd_is_coro;
     function_is_trivial = has_trivial_option f.ufd_options;
     function_is_remote = has_remote_option f.ufd_options;
     function_is_internal = has_internal_option f.ufd_options;
@@ -609,39 +610,45 @@ let define_cradle_interface_for_function_instance account_id app_id f
   in
   cpp_code_lines
     [
-      "inline cppcoro::task<" ^
-          (cpp_code_for_parameterized_type assignments
-            (sanitize_return_type f.function_return_type)) ^ ">";
-      "coro_" ^ full_public_id ^ "(";
-        "cradle::context_intf&"
-        ^ (match f.function_context_type with
-           | Some _ -> "generic_ctx"
-           | None -> "") ^ ",";
-      String.concat ","
-        (List.map
-          (fun p ->
-            (cpp_code_for_parameterized_type assignments p.parameter_type)
-            ^ " " ^ p.parameter_id)
-          f.function_parameters);
-      ")";
-      "{";
-        (match f.function_context_type with
-           | Some context_type ->
-              ("auto& ctx = cradle::cast_ctx_to_ref<" ^
-               (cpp_code_for_type context_type) ^ ">(generic_ctx);")
-           | None -> "");
-        "auto result = " ^ f.function_id ^ "("
-        ^ (match f.function_context_type with
-           | Some _ -> "ctx,"
-           | None -> "")
-        ^ String.concat ","
-            (List.map (fun p -> p.parameter_id) f.function_parameters)
-        ^ ");";
-        (match f.function_context_type with
-           | Some _ -> "ctx.on_value_complete();"
-           | None -> "");
-        "co_return result;";
-      "}";
+      if not f.function_is_coro then
+        cpp_code_lines
+          [
+            "inline cppcoro::task<" ^
+                (cpp_code_for_parameterized_type assignments
+                  (sanitize_return_type f.function_return_type)) ^ ">";
+            "coro_" ^ full_public_id ^ "(";
+              "cradle::context_intf&"
+              ^ (match f.function_context_type with
+                | Some _ -> "generic_ctx"
+                | None -> "") ^ ",";
+            String.concat ","
+              (List.map
+                (fun p ->
+                  (cpp_code_for_parameterized_type assignments p.parameter_type)
+                  ^ " " ^ p.parameter_id)
+                f.function_parameters);
+            ")";
+            "{";
+              (match f.function_context_type with
+                | Some context_type ->
+                    ("auto& ctx = cradle::cast_ctx_to_ref<" ^
+                    (cpp_code_for_type context_type) ^ ">(generic_ctx);")
+                | None -> "");
+              "auto result = " ^ f.function_id ^ "("
+              ^ (match f.function_context_type with
+                | Some _ -> "ctx,"
+                | None -> "")
+              ^ String.concat ","
+                  (List.map (fun p -> p.parameter_id) f.function_parameters)
+              ^ ");";
+              (match f.function_context_type with
+                | Some _ -> "ctx.on_value_complete();"
+                | None -> "");
+              "co_return result;";
+            "}";
+          ]
+      else
+        "";
 
       "template<"
       ^ String.concat ","
@@ -672,7 +679,7 @@ let define_cradle_interface_for_function_instance account_id app_id f
         "std::string title{\"" ^ full_public_id ^ "\"};";
         "return rq_function("
           ^ "props_type{std::move(uuid), std::move(title)},"
-          ^ "coro_" ^ full_public_id ^ ","
+          ^ (if f.function_is_coro then "" else "coro_") ^ full_public_id ^ ","
           ^ String.concat ","
               (List.map
                 (fun p ->

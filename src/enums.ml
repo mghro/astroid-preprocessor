@@ -145,6 +145,7 @@ let construct_function_options app_id e =
   let make_return_type e = [ Tid e.enum_id ] in
   {
     function_variants = [];
+    function_is_coro = false;
     function_id = "upgrade_value_" ^ e.enum_id;
     function_description = "upgrade function for " ^ e.enum_id;
     function_template_parameters = [];

@@ -163,6 +163,7 @@ type function_option =
   | FOlevel of int
 
 type unresolved_function_declaration = {
+  ufd_is_coro : bool;
   ufd_id : string;
   ufd_description : string;
   ufd_template_parameters : template_parameter list;
@@ -175,6 +176,7 @@ type unresolved_function_declaration = {
 
 type function_declaration = {
   function_variants : template_instantiations list;
+  function_is_coro : bool;
   function_id : string;
   function_description : string;
   function_template_parameters : template_parameter list;
