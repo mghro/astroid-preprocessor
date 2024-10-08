@@ -88,7 +88,12 @@ let parse_block block =
   (* If parsing a function, then separate it into declaration and
      body (which isn't parsed). *)
   try
-    if List.exists (fun s -> Str.string_match (Str.regexp "^api(fun") s 0) block
+    if (List.exists
+          (fun s -> Str.string_match (Str.regexp "^api(fun") s 0)
+          block) ||
+       (List.exists
+          (fun s -> Str.string_match (Str.regexp "^api(coro") s 0)
+          block)
     then
       try
         (* The body is everything from the first '{' on. *)
