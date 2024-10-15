@@ -431,9 +431,10 @@ let union_msgpack_definitions namespace u =
       "struct convert<" ^ namespace ^ "::" ^ u.union_id ^ ">";
       "{";
         "msgpack::object const&";
-        "operator()(msgpack::object const& o, " ^ namespace ^ "::" ^
-          u.union_id ^ "& v) const";
+        "operator()(msgpack::object const& o, "
+          ^ namespace ^ "::" ^ u.union_id ^ "& v) const";
         "{";
+          "using namespace " ^ namespace ^ ";";
           "if (o.type != msgpack::type::ARRAY)";
           "throw msgpack::type_error();";
           "if (o.via.array.size != 2)";
@@ -451,8 +452,8 @@ let union_msgpack_definitions namespace u =
                     "{";
                       cpp_code_for_type m.um_type ^ " x;";
                       "o.via.array.ptr[1].convert(x);";
-                      "v = make_" ^ u.union_id ^ "_with_" ^ m.um_id ^
-                        "(std::move(x));";
+                      "v = make_" ^ u.union_id ^ "_with_" ^ m.um_id
+                        ^ "(std::move(x));";
                       "break;";
                     "} ";
                   ])
@@ -460,14 +461,15 @@ let union_msgpack_definitions namespace u =
           "}";
           "return o;";
         "}";
-      "}";
+      "};";
       "struct pack<" ^ namespace ^ "::" ^ u.union_id ^ ">";
       "{";
         "template<typename Stream>";
         "msgpack::packer<Stream>&";
-        "operator()(msgpack::packer<Stream>& o, " ^ namespace ^ "::" ^
-          u.union_id ^ "const& v) const";
+        "operator()(msgpack::packer<Stream>& o, "
+          ^ namespace ^ "::" ^ u.union_id ^ "const& v) const";
         "{";
+          "using namespace " ^ namespace ^ ";";
           "static_assert(std::same_as<Stream, cradle::msgpack_ostream>);";
           "o.pack_array(2);";
           "o.pack(static_cast<" ^ u.union_id ^ "_tag>(v.type));";
@@ -486,7 +488,7 @@ let union_msgpack_definitions namespace u =
           "}";
           "return o;";
         "}";
-      "}";
+      "};";
       "}";
       "}";
       "}";
