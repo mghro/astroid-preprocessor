@@ -442,6 +442,7 @@ let union_msgpack_declarations namespace u =
           "return o;";
         "}";
       "};";
+      "template<>";
       "struct pack<" ^ namespace ^ "::" ^ u.union_id ^ ">";
       "{";
         "template<typename Stream>";
