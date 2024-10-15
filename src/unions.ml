@@ -448,7 +448,7 @@ let union_msgpack_declarations namespace u =
         "template<typename Stream>";
         "msgpack::packer<Stream>&";
         "operator()(msgpack::packer<Stream>& o, "
-          ^ namespace ^ "::" ^ u.union_id ^ "const& v) const";
+          ^ namespace ^ "::" ^ u.union_id ^ " const& v) const";
         "{";
           "static_assert(std::same_as<Stream, cradle::msgpack_ostream>);";
           "msgpack_pack(o, v);";
