@@ -420,9 +420,13 @@ let union_conversion_definitions u =
   ^ "} " ^ "} " ^ "std::ostream& operator<<(std::ostream& s, " ^ u.union_id
   ^ " const& x) " ^ "{ return s << cradle::to_dynamic(x); } "
 
-let union_msgpack_definitions namespace u =
+let union_msgpack_declarations namespace u =
   cpp_code_lines
     [
+      "void msgpack_convert(msgpack::object const& o, "
+        ^ u.union_id ^ "& v);";
+      "void msgpack_pack(cradle::msgpack_ostream& o, "
+        ^ u.union_id ^ " const& v);";
       "}";
       "namespace msgpack {";
       "MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {";
@@ -434,7 +438,33 @@ let union_msgpack_definitions namespace u =
         "operator()(msgpack::object const& o, "
           ^ namespace ^ "::" ^ u.union_id ^ "& v) const";
         "{";
-          "using namespace " ^ namespace ^ ";";
+          "msgpack_convert(o, v);";
+          "return o;";
+        "}";
+      "};";
+      "struct pack<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+        "template<typename Stream>";
+        "msgpack::packer<Stream>&";
+        "operator()(msgpack::packer<Stream>& o, "
+          ^ namespace ^ "::" ^ u.union_id ^ "const& v) const";
+        "{";
+          "static_assert(std::same_as<Stream, cradle::msgpack_ostream>);";
+          "msgpack_pack(o, v);";
+          "return o;";
+        "}";
+      "};";
+      "}";
+      "}";
+      "}";
+      "namespace " ^ namespace ^ " {";
+    ]
+
+let union_msgpack_definitions u =
+  cpp_code_lines
+    [
+      "void msgpack_convert(msgpack::object const& o, " ^ u.union_id ^ "& v)";
+      "{";
           "if (o.type != msgpack::type::ARRAY)";
           "throw msgpack::type_error();";
           "if (o.via.array.size != 2)";
@@ -459,18 +489,10 @@ let union_msgpack_definitions namespace u =
                   ])
               u.union_members);
           "}";
-          "return o;";
-        "}";
-      "};";
-      "struct pack<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "}";
+      "void msgpack_pack(cradle::msgpack_ostream& o, "
+        ^ u.union_id ^ " const& v);";
       "{";
-        "template<typename Stream>";
-        "msgpack::packer<Stream>&";
-        "operator()(msgpack::packer<Stream>& o, "
-          ^ namespace ^ "::" ^ u.union_id ^ "const& v) const";
-        "{";
-          "using namespace " ^ namespace ^ ";";
-          "static_assert(std::same_as<Stream, cradle::msgpack_ostream>);";
           "o.pack_array(2);";
           "o.pack(static_cast<" ^ u.union_id ^ "_tag>(v.type));";
           "switch (v.type)";
@@ -486,13 +508,7 @@ let union_msgpack_definitions namespace u =
                 ])
               u.union_members);
           "}";
-          "return o;";
-        "}";
-      "};";
       "}";
-      "}";
-      "}";
-      "namespace " ^ namespace ^ " {";
     ]
 
 let union_swap_declaration u =
@@ -611,7 +627,7 @@ let hpp_string_of_union account_id app_id namespace u =
   ^ union_hash_declarations namespace u
   ^ union_swap_declaration u
   ^ union_conversion_declarations u
-  ^ union_msgpack_definitions namespace u
+  ^ union_msgpack_declarations namespace u
   ^ union_deep_sizeof_declaration u
   ^ union_normalization_definition namespace u
 
@@ -628,6 +644,7 @@ let cpp_string_of_union account_id app_id namespace u =
   ^ union_hash_definitions namespace u
   ^ union_swap_definition u
   ^ union_conversion_definitions u
+  ^ union_msgpack_definitions u
   ^ union_deep_sizeof_definition u
 
 (* ^ union_upgrade_type_info_definition app_id u
