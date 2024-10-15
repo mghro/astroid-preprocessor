@@ -425,7 +425,7 @@ let union_msgpack_declarations namespace u =
     [
       "void msgpack_convert(msgpack::object const& o, "
         ^ u.union_id ^ "& v);";
-      "void msgpack_pack(cradle::msgpack_ostream& o, "
+      "void msgpack_pack(msgpack::packer<cradle::msgpack_ostream>& o, "
         ^ u.union_id ^ " const& v);";
       "}";
       "namespace msgpack {";
@@ -491,7 +491,7 @@ let union_msgpack_definitions u =
               u.union_members);
           "}";
       "}";
-      "void msgpack_pack(cradle::msgpack_ostream& o, "
+      "void msgpack_pack(msgpack::packer<cradle::msgpack_ostream>& o, "
         ^ u.union_id ^ " const& v)";
       "{";
           "o.pack_array(2);";
