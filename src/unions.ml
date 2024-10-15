@@ -426,6 +426,7 @@ let union_msgpack_definitions namespace u =
       "}";
       "namespace msgpack {";
       "MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {";
+      "namespace adaptor {";
       "template<>";
       "struct convert<" ^ namespace ^ "::" ^ u.union_id ^ ">";
       "{";
@@ -485,6 +486,7 @@ let union_msgpack_definitions namespace u =
           "}";
           "return o;";
         "}";
+      "}";
       "}";
       "}";
       "}";
