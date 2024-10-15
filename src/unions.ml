@@ -420,6 +420,76 @@ let union_conversion_definitions u =
   ^ "} " ^ "} " ^ "std::ostream& operator<<(std::ostream& s, " ^ u.union_id
   ^ " const& x) " ^ "{ return s << cradle::to_dynamic(x); } "
 
+let union_msgpack_definitions namespace u =
+  cpp_code_lines
+    [
+      "namespace msgpack {";
+      "MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {";
+      "template<>";
+      "struct convert<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+        "msgpack::object const&";
+        "operator()(msgpack::object const& o, " ^ namespace ^ "::" ^
+          u.union_id ^ "& v) const";
+        "{";
+          "if (o.type != msgpack::type::ARRAY)";
+          "throw msgpack::type_error();";
+          "if (o.via.array.size != 2)";
+          "throw msgpack::type_error();";
+          u.union_id ^ "_tag" ^ " type_tag;";
+          "o.via.array.ptr[0].convert(type_tag);";
+          "switch (type_tag) ";
+          "{";
+          String.concat ""
+            (List.map
+              (fun m ->
+                  cpp_code_lines
+                  [
+                    "case " ^ cpp_enum_value_of_union_member u m ^ ":";
+                    "{";
+                      cpp_code_for_type m.um_type ^ " x;";
+                      "o.via.array.ptr[1].convert(x);";
+                      "v = make_" ^ u.union_id ^ "_with_" ^ m.um_id ^
+                        "(std::move(x));";
+                      "break;";
+                    "} ";
+                  ])
+              u.union_members);
+          "}";
+          "return o;";
+        "}";
+      "}";
+      "struct pack<" ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+        "template<typename Stream>";
+        "msgpack::packer<Stream>&";
+        "operator()(msgpack::packer<Stream>& o, " ^ namespace ^ "::" ^
+          u.union_id ^ "const& v) const";
+        "{";
+          "static_assert(std::same_as<Stream, cradle::msgpack_ostream>);";
+          "o.pack_array(2);";
+          "o.pack(static_cast<" ^ u.union_id ^ "_tag>(v.type));";
+          "switch (v.type)";
+          "{";
+          String.concat ""
+            (List.map
+              (fun m ->
+                cpp_code_lines
+                [
+                  "case " ^ cpp_enum_value_of_union_member u m ^ ":";
+                  "o.pack(as_" ^ m.um_id ^ "(v));";
+                  "break;";
+                ])
+              u.union_members);
+          "}";
+          "return o;";
+        "}";
+      "}";
+      "}";
+      "}";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 let union_swap_declaration u =
   "void swap(" ^ u.union_id ^ "& a, " ^ u.union_id ^ "& b); "
 
@@ -536,6 +606,7 @@ let hpp_string_of_union account_id app_id namespace u =
   ^ union_hash_declarations namespace u
   ^ union_swap_declaration u
   ^ union_conversion_declarations u
+  ^ union_msgpack_definitions namespace u
   ^ union_deep_sizeof_declaration u
   ^ union_normalization_definition namespace u
 
