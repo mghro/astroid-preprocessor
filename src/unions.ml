@@ -492,7 +492,7 @@ let union_msgpack_definitions u =
           "}";
       "}";
       "void msgpack_pack(cradle::msgpack_ostream& o, "
-        ^ u.union_id ^ " const& v);";
+        ^ u.union_id ^ " const& v)";
       "{";
           "o.pack_array(2);";
           "o.pack(static_cast<" ^ u.union_id ^ "_tag>(v.type));";
