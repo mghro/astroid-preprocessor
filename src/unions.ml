@@ -423,6 +423,7 @@ let union_conversion_definitions u =
 let union_msgpack_definitions namespace u =
   cpp_code_lines
     [
+      "}";
       "namespace msgpack {";
       "MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {";
       "template<>";
