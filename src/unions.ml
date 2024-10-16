@@ -495,7 +495,7 @@ let union_msgpack_definitions u =
         ^ u.union_id ^ " const& v)";
       "{";
           "o.pack_array(2);";
-          "o.pack(static_cast<" ^ u.union_id ^ "_tag>(v.type));";
+          "o.pack(v.type);";
           "switch (v.type)";
           "{";
           String.concat ""
