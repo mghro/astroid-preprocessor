@@ -458,36 +458,6 @@ let hpp_function_declaration f id =
       match f.function_body with Some code -> code | _ -> "; "
     else "; " )
 
-(* Generate the definition of the request interface to function instance. *)
-(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
-   be useful to make it work for hooking functions up to Thinknode, but for now
-   it's not used. *)
-let define_request_interface_for_function_instance account_id app_id f
-    assignments cpp_id public_id full_public_id =
-  "cradle::request<"
-  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
-  ^ " > " ^ "rq_" ^ public_id ^ "("
-  ^ String.concat ", "
-      (List.map
-         (fun p ->
-           "cradle::request<"
-           ^ cpp_code_for_parameterized_type assignments p.parameter_type
-           ^ " > const& " ^ p.parameter_id ^ "_request")
-         f.function_parameters)
-  ^ ") " ^ "{ " ^ "cradle::function_request_info calc_spec_; " ^ "static "
-  ^ full_public_id ^ "_fn_def this_fn; " ^ "calc_spec_.function = &this_fn; "
-  ^ String.concat ""
-      (List.map
-         (fun p ->
-           "calc_spec_.args.push_back(" ^ p.parameter_id ^ "_request.untyped); ")
-         f.function_parameters)
-  ^ "auto function_request_ = cradle::make_typed_request<"
-  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
-  ^ " >(request_type::FUNCTION, calc_spec_); "
-  ^ ( if f.function_is_remote then "return rq_remote(function_request_); "
-    else "return function_request_; " )
-  ^ "} "
-
 (* Given a generator function, this calls it for each instance of a function
    to generate code for that instance, and then concatenates the results. *)
 let concat_code_for_function_instances generator f =
@@ -499,17 +469,9 @@ let concat_code_for_function_instances generator f =
            (f.function_public_name ^ label))
        instantiations)
 
-(* Generate the definition of the request interface to a function. *)
-(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
-   be useful to make it work for hooking functions up to Thinknode, but for now
-   it's not used. *)
-let define_request_interface_for_function account_id app_id f =
-  concat_code_for_function_instances
-    (define_request_interface_for_function_instance account_id app_id)
-    f
-
 (* Generate the CPP file code to redirect an API instance of a function to
    the original C++ function. *)
+(* TODO: Update this. *)
 let cpp_function_redirection_code f assignments cpp_id public_id full_public_id
     =
   cpp_code_for_parameterized_type assignments
@@ -562,48 +524,25 @@ let cpp_code_to_define_function account_id app_id namespace f =
 let cpp_code_to_register_function_instance f label assignments =
   let full_public_name = f.function_public_name ^ label in
   if not f.function_is_internal then
-    "\nregister_api_function(api, " ^ "cradle::api_function_ptr(new "
-    ^ full_public_name ^ "_fn_def)); "
-  else ""
+    "registry.register_resolver(catalog, rq_" ^ full_public_name ^ "("
+    ^ String.concat ", "
+      (List.map
+          (fun p ->
+            cpp_code_for_parameterized_type assignments p.parameter_type
+            ^ "()")
+          f.function_parameters)
+    ^ "));\n"
+  else
+    ""
 
 (* Generate the C++ code to register a function as part of an API. *)
-let cpp_code_to_register_function account_id app_id f = ""
-  (* let instantiations = enumerate_combinations f.function_variants in
+let cpp_code_to_register_function account_id app_id f =
+  let instantiations = enumerate_combinations f.function_variants in
   String.concat ""
     (List.map
        (fun (assignments, label) ->
          cpp_code_to_register_function_instance f label assignments)
-       instantiations) *)
-
-(* Generate the interface necessary to construct typed calculation requests
-   for this function instance. *)
-(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
-   be useful to make it work for hooking functions up to Thinknode, but for now
-   it's not used. *)
-let declare_request_interface_for_function_instance
-account_id app_id f
-    assignments cpp_id public_id full_public_id =
-  "cradle::request<"
-  ^ cpp_code_for_parameterized_type assignments (return_value_type f)
-  ^ " > " ^ "rq_" ^ public_id ^ "("
-  ^ String.concat ", "
-      (List.map
-         (fun p ->
-           "cradle::request<"
-           ^ cpp_code_for_parameterized_type assignments p.parameter_type
-           ^ " > const& " ^ p.parameter_id ^ "_request")
-         f.function_parameters)
-  ^ "); "
-
-(* Generate the interface necessary to construct typed calculation requests for
-   this function. *)
-(* THIS IS OBSOLETE! - This is the old-style Thinknode interface. It may still
-   be useful to make it work for hooking functions up to Thinknode, but for now
-   it's not used. *)
-let declare_request_interface_for_function account_id app_id f =
-  concat_code_for_function_instances
-    (declare_request_interface_for_function_instance account_id app_id)
-    f
+       instantiations)
 
 (* Generate the interface necessary to construct CRADLE calculation requests
    for this function instance. *)
@@ -795,6 +734,4 @@ let hpp_code_for_function account_id app_id namespace f =
     else "" )
   (* Declare all the API instance redirections. *)
   (* ^ concat_code_for_function_instances hpp_function_redirection_code f *)
-  (* Create the request interface. *)
-  (* ^ declare_request_interface_for_function account_id app_id f *)
   ^ define_cradle_interface_for_function account_id app_id f
