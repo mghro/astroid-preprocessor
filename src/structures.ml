@@ -1018,7 +1018,7 @@ let cpp_string_of_structure account_id app_id app_namespace env s =
    registered with the API. *)
 let cpp_code_to_register_manual_structure app_id cpp_name name revision
     description =
-  cpp_code_lines
+  (*cpp_code_lines
     [
       "register_api_named_type(";
       "    api,";
@@ -1027,7 +1027,8 @@ let cpp_code_to_register_manual_structure app_id cpp_name name revision
       "    \"" ^ String.escaped description ^ "\",";
       "    cradle::get_definitive_type_info<" ^ cpp_name ^ ">());";
       (* "    get_upgrade_type(" ^ cpp_name ^ "(), std::vector<std::type_index>())); " *)
-    ]
+    ]*)
+  ""
 
 (* Generate the C++ code to register a structure as part of an API. *)
 let cpp_code_to_register_structure app_id s =

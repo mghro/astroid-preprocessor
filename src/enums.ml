@@ -387,7 +387,7 @@ let cpp_code_to_register_upgrade_function_instance e =
   ^ full_public_name ^ "_fn_def)); "
 
 let cpp_code_to_register_enum app_id e =
-  if not (enum_is_internal e) then
+  (*if not (enum_is_internal e) then
     cpp_code_lines
       [
         "register_api_named_type(";
@@ -398,7 +398,8 @@ let cpp_code_to_register_enum app_id e =
         "    cradle::get_definitive_type_info<" ^ e.enum_id ^ ">());";
         (* "    get_upgrade_type(" ^ e.enum_id ^ "(), std::vector<std::type_index>())); " *)
       ]
-  else ""
+  else ""*)
+  ""
 
 (* Generate the C++ code to clean up the #define namespace for an enum. *)
 let cpp_cleanup_code_for_enum e =

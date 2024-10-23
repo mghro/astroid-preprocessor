@@ -654,7 +654,7 @@ let cpp_string_of_union account_id app_id namespace u =
    ^ union_upgrade_register_function_instance account_id app_id u *)
 
 let cpp_code_to_register_union app_id u =
-  if not (union_is_internal u) then
+  (*if not (union_is_internal u) then
     ( if union_has_registered_enum u then
       cpp_code_to_register_enum app_id (type_enum_of_union u)
     else "" )
@@ -668,7 +668,8 @@ let cpp_code_to_register_union app_id u =
           "    cradle::get_definitive_type_info<" ^ u.union_id ^ ">());";
           (* "    get_upgrade_type(" ^ u.union_id ^ "(), std::vector<std::type_index>())); " *)
         ] (* ^ cpp_code_to_register_upgrade_function_instance u *)
-  else ""
+  else ""*)
+  ""
 
 (* Generate the C++ code to clean up the #define namespace for a union. *)
 let cpp_cleanup_code_for_union u =
