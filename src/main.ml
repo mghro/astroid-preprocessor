@@ -195,7 +195,7 @@ let main () =
     ^ "#include <algorithm>\n"
     ^ "#include <typeinfo>\n" ^ "#include \"" ^ output_file_leaf_name ^ "\"\n"
     ^ "#include <astroid/preprocessed.h>\n"
-    ^ "#include <cradle/selfreg/seri_catalog.hpp>\n"
+    ^ "#include <cradle/inner/resolve/seri_catalog.h>\n"
     ^ "#include <boost/algorithm/string/case_conv.hpp>\n"
     ^ "\n"
     ^ "namespace " ^ namespace ^ " {\n" ^
