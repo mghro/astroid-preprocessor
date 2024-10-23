@@ -524,7 +524,7 @@ let cpp_code_to_define_function account_id app_id namespace f =
 let cpp_code_to_register_function_instance f label assignments =
   let full_public_name = f.function_public_name ^ label in
   if not f.function_is_internal then
-    "registry.register_resolver(catalog, rq_" ^ full_public_name ^ "("
+    "catalog.register_resolver(rq_" ^ full_public_name ^ "("
     ^ String.concat ", "
       (List.map
           (fun p ->
