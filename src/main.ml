@@ -86,7 +86,7 @@ let declaration_registration_code account_id type_app_id fun_app_id decl =
 let cpp_registration_code account_id type_app_id fun_app_id file_id decls =
   cpp_code_lines
     [
-      "void register_" ^ file_id ^ "_api(cradle::selfreg_seri_catalog& catalog)";
+      "void register_" ^ file_id ^ "_api(cradle::seri_catalog& catalog)";
       "{";
       String.concat ""
         (List.map
