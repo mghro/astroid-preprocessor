@@ -601,14 +601,14 @@ let union_unique_hash_declarations namespace u =
   cpp_code_lines
     [
       "void";
-      "update_unique_hash(unique_hasher& hasher, " ^ u.union_id ^ " const& x);";
+      "update_unique_hash(cradle::unique_hasher& hasher, " ^ u.union_id ^ " const& x);";
     ]
 
 let union_unique_hash_definitions namespace u =
   cpp_code_lines
     [
       "void";
-      "update_unique_hash(unique_hasher& hasher, " ^ u.union_id ^ " const& x)";
+      "update_unique_hash(cradle::unique_hasher& hasher, " ^ u.union_id ^ " const& x)";
       "{";
       "switch (x.type)";
       "{";

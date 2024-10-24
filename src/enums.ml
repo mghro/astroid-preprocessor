@@ -262,7 +262,7 @@ let enum_unique_hash_declaration namespace e =
   cpp_code_lines
     [
       "inline void";
-      "update_unique_hash(unique_hasher& hasher, " ^ e.enum_id ^ " const& x)";
+      "update_unique_hash(cradle::unique_hasher& hasher, " ^ e.enum_id ^ " const& x)";
       "{";
       "    hasher.encode_bytes(&x, sizeof(x));";
       "}";

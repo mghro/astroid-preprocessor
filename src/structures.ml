@@ -940,14 +940,14 @@ let structure_unique_hash_declaration namespace s =
     cpp_code_lines
       [
         "void";
-        "update_unique_hash(unique_hasher& hasher, " ^ s.structure_id ^ " const& x);";
+        "update_unique_hash(cradle::unique_hasher& hasher, " ^ s.structure_id ^ " const& x);";
       ]
   else
     cpp_code_lines
       [
         template_parameters_declaration s.structure_parameters;
         "void";
-        "update_unique_hash(unique_hasher& hasher, " ^ full_structure_type s ^ " const& x)";
+        "update_unique_hash(cradle::unique_hasher& hasher, " ^ full_structure_type s ^ " const& x)";
         "{";
         "using cradle::update_unique_hash;";
         ( match s.structure_super with
@@ -966,7 +966,7 @@ let structure_unique_hash_definition namespace s =
     cpp_code_lines
       [
         "void";
-        "update_unique_hash(unique_hasher& hasher, " ^ s.structure_id ^ " const& x)";
+        "update_unique_hash(cradle::unique_hasher& hasher, " ^ s.structure_id ^ " const& x)";
         "{";
         ( match s.structure_super with
         | Some super -> "update_unique_hash(hasher, as_" ^ super ^ "(x));"
