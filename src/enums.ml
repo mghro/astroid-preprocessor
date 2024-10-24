@@ -258,6 +258,18 @@ let enum_hash_declaration namespace e =
 
 let enum_hash_definition namespace e = ""
 
+let enum_unique_hash_declaration namespace e =
+  cpp_code_lines
+    [
+      "inline void";
+      "update_unique_hash(unique_hasher& hasher, " ^ e.enum_id ^ " const& x)";
+      "{";
+      "    hasher.encode_bytes(&x, sizeof(x));";
+      "}";
+    ]
+
+let enum_unique_hash_definition namespace e = ""
+
 let enum_conversion_declarations e =
   cpp_code_blocks
     [
@@ -362,6 +374,7 @@ let hpp_string_of_enum account_id app_id namespace e =
   ^ enum_type_info_declaration namespace e
   ^ enum_deep_sizeof_definition e
   ^ enum_hash_declaration namespace e
+  ^ enum_unique_hash_declaration namespace e
   ^ enum_query_declarations e
   ^ enum_conversion_declarations e
   ^ enum_normalization_definition namespace e
@@ -373,6 +386,7 @@ let hpp_string_of_enum account_id app_id namespace e =
 let cpp_string_of_enum account_id app_id namespace e =
   enum_type_info_definition app_id namespace e
   ^ enum_hash_definition namespace e
+  ^ enum_unique_hash_definition namespace e
   ^ enum_query_definitions e
   ^ enum_conversion_definitions e
 

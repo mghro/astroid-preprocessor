@@ -935,6 +935,50 @@ let structure_hash_definition namespace s =
       ]
   else ""
 
+let structure_unique_hash_declaration namespace s =
+  if not (has_parameters s) then
+    cpp_code_lines
+      [
+        "void";
+        "update_unique_hash(unique_hasher& hasher, " ^ s.structure_id ^ " const& x);";
+      ]
+  else
+    cpp_code_lines
+      [
+        template_parameters_declaration s.structure_parameters;
+        "void";
+        "update_unique_hash(unique_hasher& hasher, " ^ full_structure_type s ^ " const& x)";
+        "{";
+        "using cradle::update_unique_hash;";
+        ( match s.structure_super with
+        | Some super -> "update_unique_hash(hasher, as_" ^ super ^ "(x));"
+        | None -> "" );
+        String.concat ""
+          (List.map
+             (fun f ->
+               "update_unique_hash(hasher, x." ^ f.field_id ^ "); ")
+             s.structure_fields);
+        "}";
+      ]
+
+let structure_unique_hash_definition namespace s =
+  if not (has_parameters s) then
+    cpp_code_lines
+      [
+        "void";
+        "update_unique_hash(unique_hasher& hasher, " ^ s.structure_id ^ " const& x)";
+        "{";
+        ( match s.structure_super with
+        | Some super -> "update_unique_hash(hasher, as_" ^ super ^ "(x));"
+        | None -> "" );
+        String.concat ""
+          (List.map
+             (fun f -> "update_unique_hash(hasher, x." ^ f.field_id ^ "); ")
+             s.structure_fields);
+        "}";
+      ]
+  else ""
+
 let structure_normalization_definition namespace s =
   cpp_code_lines
     [
@@ -987,6 +1031,7 @@ let hpp_string_of_structure app_id app_namespace env s =
   ^ ( if structure_component_is_preexisting s "iostream" then ""
     else structure_iostream_declarations s )
   ^ structure_hash_declaration namespace s
+  ^ structure_unique_hash_declaration namespace s
   ^ structure_normalization_definition namespace s
   ^ structure_cereal_tag namespace s
   ^ "} namespace " ^ app_namespace ^ " { "
@@ -1011,6 +1056,7 @@ let cpp_string_of_structure account_id app_id app_namespace env s =
   ^ ( if structure_component_is_preexisting s "iostream" then ""
     else structure_iostream_definitions s )
   ^ structure_hash_definition namespace s
+  ^ structure_unique_hash_definition namespace s
   ^ "} namespace " ^ app_namespace ^ " { "
 
 (* Generate the C++ code to register a manual structure as part of an API.

@@ -597,6 +597,32 @@ let union_hash_definitions namespace u =
       "namespace " ^ namespace ^ " {";
     ]
 
+let union_unique_hash_declarations namespace u =
+  cpp_code_lines
+    [
+      "void";
+      "update_unique_hash(unique_hasher& hasher, " ^ u.union_id ^ " const& x);";
+    ]
+
+let union_unique_hash_definitions namespace u =
+  cpp_code_lines
+    [
+      "void";
+      "update_unique_hash(unique_hasher& hasher, " ^ u.union_id ^ " const& x)";
+      "{";
+      "switch (x.type)";
+      "{";
+      String.concat ""
+        (List.map
+           (fun m ->
+             "case "
+             ^ cpp_enum_value_of_union_member u m
+             ^ ": " ^ "update_unique_hash(hasher, as_" ^ m.um_id ^ "(x)); ")
+           u.union_members);
+      "}";
+      "}";
+    ]
+
 let union_normalization_definition namespace u =
   cpp_code_lines
     [
@@ -626,6 +652,7 @@ let hpp_string_of_union account_id app_id namespace u =
   ^ union_accessor_declarations u
   ^ union_comparison_declarations u
   ^ union_hash_declarations namespace u
+  ^ union_unique_hash_declarations namespace u
   ^ union_swap_declaration u
   ^ union_conversion_declarations u
   ^ union_msgpack_declarations namespace u
@@ -643,6 +670,7 @@ let cpp_string_of_union account_id app_id namespace u =
   ^ union_accessor_definitions u
   ^ union_comparison_definitions u
   ^ union_hash_definitions namespace u
+  ^ union_unique_hash_definitions namespace u
   ^ union_swap_definition u
   ^ union_conversion_definitions u
   ^ union_msgpack_definitions u
