@@ -206,7 +206,7 @@ function(preprocess_header_files
         "#include <cradle/api.hpp>\nnamespace ${MY_NAMESPACE} {\n")
     foreach(id ${preprocessed_ids})
         set(api_index
-            "${api_index}void add_${id}_api(cradle::api_implementation& api)\;\n")
+            "${api_index}void add_${id}_api(cradle::seri_catalog& catalog)\;\n")
     endforeach()
     string(TOUPPER "${MY_NAMESPACE}" uppercase_namespace)
     set(api_index
