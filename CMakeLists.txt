@@ -206,13 +206,13 @@ function(preprocess_header_files
         "#include <astroid/preprocessed.h>\nnamespace ${MY_NAMESPACE} {\n")
     foreach(id ${preprocessed_ids})
         set(api_index
-            "${api_index}void add_${id}_api(cradle::seri_catalog& catalog)\;\n")
+            "${api_index}void register_${id}_api(cradle::seri_catalog& catalog)\;\n")
     endforeach()
     string(TOUPPER "${MY_NAMESPACE}" uppercase_namespace)
     set(api_index
         "${api_index}#define ${uppercase_namespace}_REGISTER_APIS(api)\\\n")
     foreach(id ${preprocessed_ids})
-        set(api_index "${api_index}add_${id}_api(api)\;\\\n")
+        set(api_index "${api_index}register_${id}_api(api)\;\\\n")
     endforeach()
     set(api_index "${api_index}\n}\n")
     file(WRITE "${MY_INDEX_FILE}" ${api_index})
