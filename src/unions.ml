@@ -615,9 +615,12 @@ let union_unique_hash_definitions namespace u =
       String.concat ""
         (List.map
            (fun m ->
-             "case "
-             ^ cpp_enum_value_of_union_member u m
-             ^ ": " ^ "update_unique_hash(hasher, as_" ^ m.um_id ^ "(x)); ")
+              cpp_code_lines
+                [
+                  "case " ^ cpp_enum_value_of_union_member u m ^ ":";
+                  "update_unique_hash(hasher, as_" ^ m.um_id ^ "(x));";
+                  "break;";
+                ])
            u.union_members);
       "}";
       "}";
