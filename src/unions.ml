@@ -641,6 +641,19 @@ let union_normalization_definition namespace u =
       "namespace " ^ namespace ^ " {";
     ]
 
+let union_cereal_tag namespace u =
+  cpp_code_lines
+    [
+      "}"; (* Close namespace. *)
+      "template<>";
+      "struct cradle::serializable_via_cereal<"
+        ^ namespace ^ "::" ^ u.union_id ^ ">";
+      "{";
+      "    static constexpr bool value = true;";
+      "};";
+      "namespace " ^ namespace ^ " {";
+    ]
+
 (* Generate C++ code to register API function for upgrading values *)
 let cpp_code_to_register_upgrade_function_instance u =
   let full_public_name = "upgrade_value_" ^ u.union_id in
@@ -661,7 +674,7 @@ let hpp_string_of_union account_id app_id namespace u =
   ^ union_msgpack_declarations namespace u
   ^ union_deep_sizeof_declaration u
   ^ union_normalization_definition namespace u
-
+  ^ union_cereal_tag namespace u
 (* ^ union_upgrade_type_info_declaration u
    ^ union_auto_upgrade_value_declaration u
    ^ union_upgrade_value_declaration_api_instance app_id u *)
